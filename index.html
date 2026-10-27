@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2f3f6">
+<title>EDU213 テスト対策</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 一列の学習机。上に見出し、中央にカード、画面下にタブ。 */
+:root{
+  --bg:#f2f3f6; --paper:#ffffff; --ink:#1c1e24; --muted:#636875; --line:#dcdfe6;
+  --accent:#5b3ff2; --accent-soft:#ebe7fe; --on-accent:#ffffff;
+  --ok:#1f8a5b; --ok-soft:#e2f4ea; --ng:#c43c3c; --ng-soft:#fbe5e5; --warn:#a86a00;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --navh:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16171b; --paper:#1f2127; --ink:#e8e9ee; --muted:#9a9fab; --line:#30333b;
+  --accent:#8f7dff; --accent-soft:#2a2550; --on-accent:#16171b;
+  --ok:#5fcf97; --ok-soft:#173326; --ng:#f08585; --ng-soft:#3b1d1d; --warn:#e0a84a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16171b; --paper:#1f2127; --ink:#e8e9ee; --muted:#9a9fab; --line:#30333b;
+  --accent:#8f7dff; --accent-soft:#2a2550; --on-accent:#16171b;
+  --ok:#5fcf97; --ok-soft:#173326; --ng:#f08585; --ng-soft:#3b1d1d; --warn:#e0a84a; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:640px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) calc(var(--navh) + 32px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:16px}
+header .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted)}
+h1{font-weight:700;font-size:24px;line-height:1.3;margin:2px 0 0}
+h2{font-size:16px;margin:0;font-weight:700}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lbl{font-size:12px;color:var(--muted);letter-spacing:.06em;width:100%}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;font-size:14px;min-height:40px}
+.chip:disabled{opacity:.4;cursor:default}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.chip .n{font-family:var(--mono);font-size:12px;opacity:.75;margin-left:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);border-radius:10px;padding:10px 18px;font-weight:700;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.plain{background:transparent;border-color:var(--line);color:var(--ink);font-weight:500}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ng{background:transparent;border-color:var(--ng);color:var(--ng)}
+.btn.okb{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.btn.danger{background:var(--ng);border-color:var(--ng);color:var(--paper)}
+.btn svg,.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.link{background:none;border:0;padding:6px 0;color:var(--accent);font-weight:500;min-height:40px}
+.meta{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);align-items:center}
+.tag{background:var(--accent-soft);color:var(--accent);padding:1px 8px;border-radius:4px;font-family:var(--body);font-weight:500;font-size:12px}
+.q{font-weight:700;font-size:18px;line-height:1.65;margin:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:transparent;border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:baseline;min-height:52px;width:100%}
+.opt .k{font-family:var(--mono);color:var(--muted);font-size:12px;flex:none}
+@media (hover:hover){.opt:hover:not(:disabled){border-color:var(--accent)}}
+.opt.ok{background:var(--ok-soft);border-color:var(--ok)}
+.opt.ng{background:var(--ng-soft);border-color:var(--ng)}
+.opt.dim{opacity:.55}
+.opt:disabled{cursor:default}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tfrow .opt{justify-content:center;font-size:24px;padding:14px;min-height:64px}
+.exp{border-left:3px solid var(--accent);padding:4px 0 4px 12px;font-size:15px}
+.exp b{display:block;margin-bottom:2px}
+.exp.ok{border-color:var(--ok)} .exp.ng{border-color:var(--ng)}
+.exp.ok b{color:var(--ok)} .exp.ng b{color:var(--ng)}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.prog.ok i{background:var(--ok)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.big{font-family:var(--mono);font-weight:500;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:16px;color:var(--muted);margin-left:4px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.fc{touch-action:pan-y;user-select:none;-webkit-user-select:none;width:100%;min-height:280px;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:22px 18px;text-align:left;display:flex;flex-direction:column;gap:12px;position:relative}
+.fc .side{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+.fc .front{font-weight:700;font-size:20px;line-height:1.5}
+.fc .back{font-size:15px;white-space:pre-line;border-top:1px dashed var(--line);padding-top:12px}
+.fc .back .ans{display:block;color:var(--accent);font-weight:700;font-size:17px;margin-bottom:4px}
+.fc .hint{margin-top:auto;font-size:12px;color:var(--muted)}
+.deck{position:relative}
+.stamp{position:absolute;top:12px;z-index:2;font-family:var(--mono);font-size:13px;padding:2px 10px;border:1.5px solid;border-radius:6px;opacity:0;pointer-events:none;background:var(--paper)}
+.stamp.l{left:12px;color:var(--ng)} .stamp.r{right:12px;color:var(--ok)}
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wk{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;background:none;border:0;padding:8px 0;text-align:left;width:100%;border-top:1px solid var(--line)}
+.wk:first-of-type{border-top:0}
+.wk .prog{grid-column:1/-1}
+.wk .t{font-size:14px}
+.wk .num{font-size:12px;color:var(--muted)}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;background:var(--paper)}
+.item .qq{font-weight:700;margin-bottom:4px}
+.item .aa{color:var(--accent);font-weight:700}
+.item .ee{color:var(--muted);font-size:14px;white-space:pre-line}
+.item mark{background:var(--accent-soft);color:inherit;border-radius:2px}
+.search{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 14px 10px 40px;min-height:48px;font-size:16px}
+.sbox{position:relative}
+.sbox .ico{position:absolute;left:13px;top:15px;color:var(--muted)}
+textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:12px;font-size:16px;line-height:1.7;resize:vertical}
+.pt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:transparent;text-align:left;width:100%;min-height:48px}
+.pt .box{width:20px;height:20px;border:1.5px solid var(--muted);border-radius:5px;flex:none;margin-top:3px;display:grid;place-items:center}
+.pt[aria-pressed="true"]{border-color:var(--ok);background:var(--ok-soft)}
+.pt[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.pt .box svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.model{white-space:pre-line;font-size:15px;border-left:3px solid var(--accent);padding-left:12px}
+.badge{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.badge.ok{color:var(--ok);border-color:var(--ok)}
+.badge.mid{color:var(--warn);border-color:var(--warn)}
+.confirm{border:1px solid var(--ng);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--ng-soft)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:10}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);width:100%;max-width:640px}
+nav.tabs button{background:none;border:0;min-height:var(--navh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--muted);position:relative}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
+nav.tabs .dot{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-family:var(--mono);font-size:10px;line-height:18px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.on{opacity:1}
+.kbd{display:none}
+@media (hover:hover) and (pointer:fine){.kbd{display:block}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="eyebrow">EDU213 教育行政学 · 仲田康一</div><h1 id="ttl" tabindex="-1" style="outline:none">ホーム</h1></header>
+  <main id="view" aria-live="polite"></main>
+</div>
+<nav class="tabs" aria-label="画面の切り替え"><div class="in" id="tabs"></div></nav>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const W={1:"第1回 公教育と戦後教育法制",2:"第2回補足 一条校の境界",3:"第3回 就学義務と不登校",4:"第4回 新自由主義と教育改革"};
+// t: m=4択, x=○×(a:0=○,1=×)
+const Q=[
+// ---- 第1回
+{id:"w1-01",w:1,q:"近代公教育の3原則として正しい組み合わせは？",o:["無償・義務・世俗","無償・選択・競争","義務・宗教・愛国","平等・自治・中立"],a:0,e:"無償教育・義務教育・世俗教育（宗教的中立）。"},
+{id:"w1-02",w:1,q:"日本で学制が発布された年は？",o:["1868年","1872年","1886年","1890年"],a:1,e:"1872（明治5）年に学制発布、初等教育を義務化。無償化は明治33（1900）年。"},
+{id:"w1-03",w:1,q:"小学校の授業料が無償化されたのはいつ？",o:["明治5年","明治19年","明治33年","昭和22年"],a:2,e:"義務化（1872）から約30年後の明治33（1900）年。"},
+{id:"w1-04",w:1,q:"教育勅語が発布された年は？",o:["1872年","1880年","1890年","1941年"],a:2,e:"1890年。天皇への忠誠を通して国策に協力させる姿勢を取らせた。"},
+{id:"w1-05",w:1,t:"x",q:"大日本帝国憲法には教育に関する条項があり、教育は法律で定められていた。",a:1,e:"×。憲法に教育条項はなく、第9条（命令大権）に基づき勅令で統治された（勅令主義）。"},
+{id:"w1-06",w:1,t:"x",q:"戦前の「教育を受けさせる義務」は、子どもの権利保障のためでなく国家に対する義務だった。",a:0,e:"○。戦後、保護者が子どもに対して負う義務へと意味が転換した。"},
+{id:"w1-07",w:1,q:"日本国憲法26条1項「その（　）に応じて、ひとしく教育を受ける権利を有する」",o:["必要","能力","年齢","希望"],a:1,e:"「能力に応じて、ひとしく」。兼子仁は「能力発達上の必要に応じた教育」をひとしく保障すると解釈。"},
+{id:"w1-08",w:1,q:"憲法26条2項で、義務教育の「義務」を負うのは誰？",o:["子ども","国民が国家に対して","保護者（その保護する子女に対して）","学校"],a:2,e:"保護者が子どもに対して負う義務。その前提として行政の義務（学校設置、授業料不徴収、児童労働禁止など）も予定されている。"},
+{id:"w1-09",w:1,q:"旧教育基本法10条「教育は、（　）に服することなく、国民全体に対し直接に責任を負つて行われるべき」",o:["国家の統制","不当な支配","政治的干渉","市場原理"],a:1,e:"「不当な支配」。2項で教育行政は「諸条件の整備確立」を目標とする（それにとどまる）とされた。"},
+{id:"w1-10",w:1,q:"学習権（子どもが学習要求を充足する教育を大人一般に要求する権利）を述べた最高裁判例は？",o:["家永教科書裁判","旭川学力テスト事件","伝習館高校事件","堀木訴訟"],a:1,e:"旭川学力テスト事件最高裁判決（1976）。"},
+{id:"w1-11",w:1,q:"戦後に構築された学校体系は？",o:["6-3-3制の単線型","複線型","5-4-3制の分岐型","3-3-6制"],a:0,e:"戦前の複線型から、6-3-3制の単線型へ。"},
+{id:"w1-12",w:1,q:"義務教育無償の範囲をめぐる2つの説は？",o:["義務教育無償説 vs 授業料無償説","全額説 vs 半額説","公立説 vs 私立説","国庫説 vs 地方説"],a:0,e:"給食費無償化や教材の共有化など私費負担の見直しが課題。"},
+{id:"w1-13",w:1,t:"x",q:"日本国籍を持たない子どもの保護者にも、就学させる義務が課されている。",a:1,e:"×。教育を受ける権利の享有者ではあり公立学校に通えるが、養育者に就学義務がなく不就学が問題になっている。"},
+{id:"w1-14",w:1,q:"外国人学校の多くの法的位置づけは？",o:["一条校","各種学校","専修学校","社会教育施設"],a:1,e:"各種学校。公的補助が少なく設置要件も低い（保健室がない学校も多い）。"},
+{id:"w1-15",w:1,q:"子どもの権利条約が国連で採択された年と日本の批准年は？",o:["1959年／1979年","1989年／1994年","1990年／1998年","1994年／2004年"],a:1,e:"1989年採択（1990年発効）、日本は1994年批准（158番目）。"},
+{id:"w1-16",w:1,q:"子どもの権利条約の「四つの一般原則」に含まれないものは？",o:["差別の禁止","子どもの最善の利益","子どもの意見の尊重","親の指導の尊重"],a:3,e:"残りの1つは「生命、生存及び発達に対する権利」。親の指導の尊重は第5条。"},
+{id:"w1-17",w:1,q:"条約を誠実に遵守すると定めた憲法の条文は？",o:["第26条","第89条","第98条2項","第99条"],a:2,e:"第98条2項。条約に批准したら国内法整備を進める必要がある。"},
+{id:"w1-18",w:1,q:"日本が国連子どもの権利委員会の審査を受けた年に含まれないのは？",o:["1998年","2004年","2010年","2016年"],a:3,e:"1998・2004・2010・2019年。"},
+{id:"w1-19",w:1,q:"2019年総括所見で教育分野に加わった勧告として正しくないものは？",o:["いじめ防止","ストレスからの解放","朝鮮学校","学校選択制の導入"],a:3,e:"前回勧告＋いじめ防止、ストレスからの解放、朝鮮学校。"},
+{id:"w1-20",w:1,t:"x",q:"こども基本法（2022年制定）には、具体的な子どもの権利と子どもの権利擁護委員会の設置が明記された。",a:1,e:"×。どちらも入っていない。2023年4月施行。"},
+{id:"w1-21",w:1,q:"子どもの権利条約第1条で「子ども」とは？",o:["15歳未満","18歳未満","20歳未満","義務教育段階の者"],a:1,e:"18歳になっていない人。"},
+{id:"w1-22",w:1,q:"「現代国家が国民の教育をうける権利を積極的に保障していくために原理的に条件整備義務を負う教育」という公教育の定義は誰のもの？",o:["中川律","兼子仁","広田照幸","宮澤俊義"],a:1,e:"兼子仁『教育法・新版』（1978）。"},
+// ---- 第2回補足
+{id:"w2-01",w:2,q:"盲・聾学校が完全義務化された年は？",o:["1948年","1956年","1979年","2007年"],a:1,e:"盲・聾学校1956年、養護学校1979年。同時に普通学校と障害児学校の別学システムが成立。"},
+{id:"w2-02",w:2,q:"養護学校が義務化された年は？",o:["1956年","1969年","1979年","1990年"],a:2,e:"1979年。戦後直後は就学猶予・就学免除で不就学が正当化されていた。"},
+{id:"w2-03",w:2,q:"1950年代まで、労働力として期待される子どもの就学を支えた実践は？",o:["夜間中学","寺子屋","通信制高校","フリースクール"],a:0,e:"被差別部落、工業地帯、漁村などでの「夜間中学」実践。"},
+{id:"w2-04",w:2,q:"朝鮮学校に閉鎖令が出された年は？",o:["1945年","1948年","1965年","2010年"],a:1,e:"1948年閉鎖令→50年代自主運営で再建→60年代各種学校認可運動→00年代〜高校無償化からの排除。"},
+// ---- 第3回
+{id:"w3-01",w:3,q:"保護者の就学義務（小学校）を定めた法律と条文は？",o:["教育基本法5条","学校教育法17条","学校教育法144条","教育機会確保法13条"],a:1,e:"学校教育法17条。就学義務＝一条校に在籍＆通学させる義務。"},
+{id:"w3-02",w:3,q:"2000年4月1日生まれの子が小学校に入学するのは？",o:["2006年4月1日","2007年4月1日","2006年4月2日","2005年4月1日"],a:0,e:"誕生日前日の24時に年を取るので、満6歳に達する日は2006年3月31日。翌日以後最初の学年の初め＝2006年4月1日。4月2日生まれから翌年度。"},
+{id:"w3-03",w:3,q:"文科省の定義で「不登校」は年間何日以上の欠席？",o:["15日","30日","60日","90日"],a:1,e:"病気や経済的理由を除き年間30日以上。連続でなく断続的な合計でもよい。"},
+{id:"w3-04",w:3,q:"令和6年度調査の小中学校の不登校児童生徒数は？",o:["約13万人","約24万人","約35万4千人","約50万人"],a:2,e:"過去最多の約35万4千人。10年前の約2倍。中学では約15人に1人（30人学級で1クラス約2人）。"},
+{id:"w3-05",w:3,q:"政府が不登校は「誰にでもおこりうる」とした年は？",o:["1966年","1989年","1992年","2016年"],a:2,e:"1992年。「登校への促しは状況を悪化させてしまう場合もある」とも。"},
+{id:"w3-06",w:3,t:"x",q:"正当な理由なく就学させない保護者は就学督促の対象となり、罰金の可能性がある。",a:0,e:"○。就学督促（学校教育法17条3項）、罰金（同144条）。ただし「通学を強制される不利益」の方が大きい場合は正当な理由とされる。"},
+{id:"w3-07",w:3,q:"自治体が設ける「教育支援センター」の旧名は？",o:["適応指導教室","校内フリースクール","特別支援教室","相談指導学級"],a:0,e:"旧名：適応指導教室。無料で利用できる。校内の「校内教育支援センター」も増加。"},
+{id:"w3-08",w:3,q:"教育機会確保法が制定された年は？",o:["2006年","2014年","2016年","2022年"],a:2,e:"2016年。正式名は「義務教育の段階における普通教育に相当する教育の機会の確保等に関する法律」。"},
+{id:"w3-09",w:3,q:"教育機会確保法で「休養の必要性」と学校外の多様な学びへの情報提供・助言を定めた条文は？",o:["第9条","第10条","第13条","第17条"],a:2,e:"9条＝情報共有、10条＝特別の教育を行う学校の整備、13条＝休養の必要性・学校外の学び。"},
+{id:"w3-10",w:3,q:"文科省の調査名が「児童生徒の問題行動・不登校等生徒指導上の諸課題に関する調査」に変わったのは？",o:["1992年度","2007年度","2016年度","2019年度"],a:2,e:"2016年度から。不登校が問題行動でないことを公式に示した。"},
+{id:"w3-11",w:3,q:"学びの多様化学校（不登校特例校）の政府目標と2026年度の数は？",o:["100校／24校","300校／84校","300校／150校","500校／84校"],a:1,e:"目標300校、2026年度84校。一条校なので通えば不登校ではなくなる。"},
+{id:"w3-12",w:3,q:"学びの多様化学校の授業時数の目安は？（標準は小4以上で年1015時間）",o:["約500時間","約700時間","約850時間","約1015時間"],a:1,e:"700時間程度に設定。"},
+{id:"w3-13",w:3,q:"東京都のフリースクール利用者への補助（2024年度〜）は？",o:["月1万円","月2万円","月4万円","年94万円"],a:1,e:"月2万円（利用料は月4〜5万円）。国による一律の補助制度はない。"},
+{id:"w3-14",w:3,q:"長野県フリースクール認証制度の「学び支援型」の要件として正しいものは？",o:["週1日以上開所・資格不問","週3日以上開所・1人以上が教員免許","週5日開所・全員教員免許","在籍校との連携不要"],a:1,e:"居場所支援型は週1日以上・資格不問。両型とも1年以上の活動実績が必要。3年間認証、最大200万円の補助。"},
+{id:"w3-15",w:3,q:"フリースクールの認証・認定を行う自治体として資料に挙がっているのは？",o:["長野県・尼崎市","東京都・大阪市","北海道・札幌市","神奈川県・川崎市"],a:0,e:"長野県と尼崎市。"},
+{id:"w3-16",w:3,t:"x",q:"フリースクールにだけ通っている子どもは、原籍校の学籍がなくなる。",a:1,e:"×。学籍は原籍校に残り、卒業も原籍校から。校長判断で出席扱いにできる。"},
+{id:"w3-17",w:3,t:"x",q:"義務教育では、一日も出席しなくても原則として卒業できる。",a:0,e:"○。セーフティネットだが、支援なしでも「卒業」で処理できてしまう面もある。"},
+{id:"w3-18",w:3,t:"x",q:"文科省は「不登校は問題行動である」と位置づけている。",a:1,e:"×。2016年の通知で「問題行動ではない」と明示。"},
+{id:"w3-19",w:3,q:"フリースクール等での学習成果が指導要録に反映された不登校児童生徒数（令和6年度）は？",o:["約1万3千人","約3万人","約8万1千人","約15万人"],a:2,e:"約8万1千人。2024年には自宅等での学習を成績評価に含めることも可能に。"},
+{id:"w3-20",w:3,q:"ICT等を使った自宅学習で出席扱いとなった人数（令和6年度）は？",o:["約1万3千人","約5万人","約8万1千人","約35万人"],a:0,e:"約1万3千人。文科省通知（2005年、2019年改訂）により校長判断で可能。"},
+{id:"w3-21",w:3,q:"不登校児童生徒のうち、学校内外の専門機関で相談・指導を受けた割合は？",o:["約3割","約6割","約8割","約9割"],a:1,e:"約6割。残り約4割はどこにもつながっていない。"},
+{id:"w3-22",w:3,q:"「フリースクール」について正しいものは？",o:["学校教育法で定義されている","法律上の定義がなく誰でも名乗れる","国の認可が必要","一条校の一種"],a:1,e:"法的定義なし。全国に約500か所。質の保証は公的に行われていない。"},
+{id:"w3-23",w:3,q:"公立学校に投入される公費は児童一人あたり年間約いくら？",o:["約24万円","約60万円","約94万円","約200万円"],a:2,e:"約94万円。フリースクールへの公的支援の薄さとの対比。"},
+{id:"w3-24",w:3,q:"高等学校の不登校生徒数はおよそ？",o:["約2万人","約6万人","約15万人","約27万人"],a:1,e:"約6万人程度。一方、通信制高校の生徒数は増加中。"},
+{id:"w3-25",w:3,q:"通信制高校は本来、何のために特例的に認められたもの？",o:["不登校生徒の受け皿","勤労青年に高校教育の機会を提供","大学進学準備","障害のある生徒の教育"],a:1,e:"勤労青年向け。近年は広域通信制への流入が地滑り的。"},
+{id:"w3-26",w:3,q:"N高とN中等部の扱いの違いとして正しいものは？",o:["どちらも正規の学校","N高は正規の学校（高校無償化対象）、N中等部はフリースクール的扱い","どちらもフリースクール扱い","N中等部だけ正規の学校"],a:1,e:"高校は通信制が認められているが、義務教育段階では通信制課程がない。"},
+{id:"w3-27",w:3,q:"1966年読売新聞夕刊で不登校はどう呼ばれていた？",o:["登校拒否","学校恐怖症","不登校","ひきこもり"],a:1,e:"「学校恐怖症」「甘やかしは禁物」。当事者や保護者を非難する論調が強かった。"},
+// ---- 第4回
+{id:"w4-01",w:4,q:"ロールアウト（伸展）型新自由主義の特徴は？",o:["国家が市場活用のため社会に能動的に介入し、補助金と評価で統治","規制緩和と緊縮財政のみ","福祉国家の拡大","市場原理の否定"],a:0,e:"「破壊」だけでなく「創造」。コミュニティ活性化、自助・共助、レジリエンスの強調。ロールバック型は規制緩和・小さな政府・自己責任。"},
+{id:"w4-02",w:4,q:"新自由主義を「強力な私的所有権、自由市場、自由貿易を特徴とする制度的枠組み…」と定義したのは？",o:["D.ハーヴェイ","S.ボール","O.ジョーンズ","広田照幸"],a:0,e:"ハーヴェイ『新自由主義』。教育版の定義は広田照幸（2009）。"},
+{id:"w4-03",w:4,q:"サッチャー改革で導入されたものに含まれないのは？",o:["学校選択制","ナショナル・カリキュラムとテスト","Ofstedによる査察と公表","総合制中等学校の拡大"],a:3,e:"総合制中等学校は戦後の福祉国家期。サッチャーは生徒数に応じた予算配分、教育予算削減なども進めた。"},
+{id:"w4-04",w:4,q:"「教育、教育、教育」と唱えたのは？",o:["サッチャー","ブレア","キャメロン","メイジャー"],a:1,e:"新労働党ブレア。「新しいイギリスは能力主義です」。労働者階級から「抜け出す」ことを目指した。"},
+{id:"w4-05",w:4,q:"英国アカデミーが法制化された年は？",o:["1988年","1997年","2002年","2010年"],a:2,e:"2002年。困難地域の中等学校の立て直しのため導入。"},
+{id:"w4-06",w:4,t:"x",q:"アカデミーはナショナル・カリキュラムや全国共通教員給与基準を守る義務があり、教員は教員資格が必要である。",a:1,e:"×。どちらの義務もない。運営はアカデミー・トラスト（有限責任保証会社）。"},
+{id:"w4-07",w:4,q:"Ofstedの評価が悪い学校が既存のアカデミーの傘下に入れられる仕組みは？",o:["強制的アカデミー化","オープン・エンロールメント","リーグ・テーブル","フリースクール化"],a:0,e:"2010年以降の保守連立政権下。巨大チェーン化（MAT）も進む。"},
+{id:"w4-08",w:4,q:"アカデミーの数の推移として正しいものは？",o:["2009年度203校→2021年1月9444校","2002年50校→2010年500校","2009年度2000校→2021年3000校","減少傾向"],a:0,e:"中等段階では公的セクターの学校の7割程度に。"},
+{id:"w4-09",w:4,q:"英国の全国学校ランキングの名称は？",o:["リーグ・テーブル","スクール・インデックス","ナショナル・ランク","Ofstedスコア"],a:0,e:"上位校の学区は住宅価格が高騰し「ソーシャルアパルトヘイト」に。"},
+{id:"w4-10",w:4,q:"児美川による日本の新自由主義教育改革の第1期（1980年代〜90年代半ば）の特徴は？",o:["臨教審で「塾を学校に！」などの主張。ただし民間と公教育の区分は強く意識","学校選択制・学テが実現","GIGAスクール構想","アカデミー導入"],a:0,e:"中曽根政権の臨時教育審議会。"},
+{id:"w4-11",w:4,q:"第2期（1990年代末〜2010年代後半）の改革に含まれないものは？",o:["公立学校選択制","義務教育費国庫負担金の負担率削減","民間人校長","GIGAスクール構想"],a:3,e:"GIGAスクール・EdTechは第3期（2010年代後半〜）。第2期は学テ、教員評価と給与連動、学校評価義務化、株式会社立学校なども。"},
+{id:"w4-12",w:4,q:"新自由主義と共振する新保守主義の要素として資料に挙がっていないものは？",o:["道徳的権威主義","愛国心の強調","国の統制や政治介入","教師の教育の自由の拡大"],a:3,e:"a道徳的権威主義、b愛国心・ナショナルアイデンティティ、c国の統制・政治介入。"},
+{id:"w4-13",w:4,q:"首長が教育に介入しやすくなる地方教育行政の法改正は何年？",o:["2006年","2007年","2015年","2022年"],a:2,e:"2015年。教育委員会の独立性を弱めた。"},
+{id:"w4-14",w:4,q:"教育基本法が改正されたのは？",o:["1947年3月","2006年12月","2015年6月","2022年6月"],a:1,e:"2006年12月。旧法は1947年3月。"},
+{id:"w4-15",w:4,q:"旧10条から新16条で削られた文言は？",o:["不当な支配に服することなく","国民全体に対し直接に責任を負つて","法律の定めるところにより","機会均等"],a:1,e:"新法は「この法律及び他の法律の定めるところにより行われるべき」に。2項で国の施策策定・実施を規定。"},
+{id:"w4-16",w:4,q:"新教育基本法2条五号の内容は？",o:["伝統と文化を尊重し、我が国と郷土を愛する態度","生命を尊び自然を大切にする態度","男女の平等","幅広い知識と教養"],a:0,e:"愛国心や「伝統・文化の尊重」が教育基本法に入った。"},
+{id:"w4-17",w:4,q:"「型のとおりにやるのなら教師は機械にすぎない」と書いたのは？",o:["1947年学習指導要領（試案）","1958年学習指導要領","教育勅語","旭川学テ判決"],a:0,e:"教師自身が研究していく手引きとして書かれた。"},
+{id:"w4-18",w:4,q:"学習指導要領が告示化され法的拘束力が主張されたのは？",o:["1947年","1958年以降","1976年","2007年"],a:1,e:"1958年以降。教科書検定の強化・全国学力テストも。"},
+{id:"w4-19",w:4,q:"旭川学テ判決で、国が定める教育内容の基準はどこまでにとどめるべきとされた？",o:["詳細な基準","大綱的な基準","基準は一切設けない","地方に全て委ねる"],a:1,e:"1976年5月21日最高裁。教師の創意工夫、地方自治の原則も考慮。"},
+{id:"w4-20",w:4,q:"全国学力テストが復活した年は？",o:["1958年","1976年","2007年","2015年"],a:2,e:"2007年。学校間の競争意識の内面化。"},
+{id:"w4-21",w:4,q:"「教育は政治的干渉より守られなければならないとともに、官僚的支配に対しても保護せられなければならない」と述べたのは？",o:["田中耕太郎","兼子仁","宮澤俊義","堀尾輝久"],a:0,e:"田中耕太郎『新憲法と文化』（1948）。"},
+{id:"w4-22",w:4,q:"仲田らが翻訳した『学力工場の社会学』（クルツ）の調査対象校は？",o:["ドリームフィールズ校","サマーヒル校","イートン校","ハマータウン校"],a:0,e:"「成功例」とされたアカデミーで、規律主義が人種・階級による偏りを帯びていたことを描いた。"}
+];
+const C=[
+{id:"c1-01",w:1,f:"公教育（public）の3要素",b:"(1)政府の関与（規制・正統性）\n(2)税金による費用負担（助成）\n(3)全員を対象（平等を志向）"},
+{id:"c1-02",w:1,f:"憲法26条",b:"1項 能力に応じて、ひとしく教育を受ける権利\n2項 保護する子女に普通教育を受けさせる義務／義務教育は無償"},
+{id:"c1-03",w:1,f:"戦後教育法制の転換点",b:"a 権利としての教育（学習権）\nb 義務＝保護者が子に負う\nc 能力に応じてひとしく・6-3-3単線型\nd 法律主義（↔勅令主義）\ne 人格の完成・個人の価値・平和\nf 不当な支配の禁止、行政は条件整備"},
+{id:"c1-04",w:1,f:"子どもの権利条約 四つの一般原則",b:"差別の禁止／子どもの最善の利益／生命・生存・発達への権利／子どもの意見の尊重"},
+{id:"c1-05",w:1,f:"こども基本法",b:"2022年6月制定・2023年4月施行\n○ 条約の4原則相当・意見反映・省庁設置\n× 具体的権利の明記なし・権利擁護委員会なし"},
+{id:"c3-01",w:3,f:"不登校の定義",b:"病気・経済的理由を除き、年間30日以上欠席（断続でも可）"},
+{id:"c3-02",w:3,f:"教育機会確保法（2016）",b:"9条 情報共有\n10条 特別の教育を行う学校の整備\n13条 休養の必要性・学校外の多様な学び"},
+{id:"c3-03",w:3,f:"学びの多様化学校",b:"旧称 不登校特例校／目標300校、2026年度84校\n授業時数700時間程度（標準1015）／一条校"},
+{id:"c3-04",w:3,f:"長野県フリースクール認証",b:"居場所支援型：週1日以上・資格不問\n学び支援型：週3日以上・1人以上教員免許\n共通：1年以上の実績、在籍校との連携\n3年間認証・最大200万円補助"},
+{id:"c3-05",w:3,f:"不登校の主要数字",b:"小中 約35万4千人（R6）／中学で約15人に1人\n高校 約6万人\n指導要録反映 約8万1千人\nICT出席扱い 約1万3千人\n支援につながる 約6割\nフリースクール 約500か所・月3〜5万円\n公立校の公費 年約94万円/人"},
+{id:"c4-01",w:4,f:"ロールバック型 vs ロールアウト型",b:"バック：規制緩和・小さな政府・緊縮・自己責任\nアウト：国家が能動介入・コミュニティ活性化・自助共助・レジリエンス・補助金と評価による統治"},
+{id:"c4-02",w:4,f:"英国アカデミー",b:"2002年法制化／困難地域の中等学校から\nナショカリ・給与基準・教員資格の義務なし\nアカデミー・トラスト（有限責任保証会社）\n2010〜 初等へ拡大・強制的アカデミー化・MAT"},
+{id:"c4-03",w:4,f:"日本の新自由主義 3期",b:"第1期 80s〜90s半ば：臨教審「塾を学校に」\n第2期 90s末〜2010s後半：学校選択、学テ、国庫負担率削減、学校評価、民間人校長\n第3期 2010s後半〜：GIGA・EdTech、官民の境界が曖昧に"},
+{id:"c4-04",w:4,f:"旧10条 → 新16条",b:"旧：不当な支配に服することなく、国民全体に対し直接に責任を負つて／行政は条件整備\n新：この法律及び他の法律の定めるところにより／国が施策を総合的に策定・実施"},
+{id:"c4-05",w:4,f:"旭川学テ判決（1976.5.21）",b:"国の教育内容への介入は一切排除されるわけではない\nただし教師の創意工夫・地方自治を考慮し、機会均等と全国水準のため必要かつ合理的な「大綱的」基準にとどめる"},
+{id:"c4-06",w:4,f:"学習指導要領の流れ",b:"1947 試案（教師の研究の手引き）\n1958〜 告示化・法的拘束力\n2007 全国学テ復活"}
+];
+
+// 旧版（配列の順番がid）の記録を読み替えるための表。書き換えない
+const LEGACY=["w1-01","w1-02","w1-03","w1-04","w1-05","w1-06","w1-07","w1-08","w1-09","w1-10","w1-11","w1-12","w1-13","w1-14","w1-15","w1-16","w1-17","w1-18","w1-19","w1-20","w1-21","w1-22","w2-01","w2-02","w2-03","w2-04","w3-01","w3-02","w3-03","w3-04","w3-05","w3-06","w3-07","w3-08","w3-09","w3-10","w3-11","w3-12","w3-13","w3-14","w3-15","w3-16","w3-17","w3-18","w3-19","w3-20","w3-21","w3-22","w3-23","w3-24","w3-25","w3-26","w3-27","w4-01","w4-02","w4-03","w4-04","w4-05","w4-06","w4-07","w4-08","w4-09","w4-10","w4-11","w4-12","w4-13","w4-14","w4-15","w4-16","w4-17","w4-18","w4-19","w4-20","w4-21","w4-22"];
+</script>
+<script>
+// 記述式の論点。模範解答・チェック項目はレジュメ（問題・用語カードと同じ出典）にある内容だけで書く
+const E=[
+{id:"e1",w:1,t:"義務教育の「義務」の意味転換",p:"戦前と戦後で、義務教育の「義務」の意味はどう変わったか。説明しなさい。",
+ m:"戦前は大日本帝国憲法に教育条項がなく、教育は第9条（命令大権）に基づく勅令で統治された（勅令主義）。「教育を受けさせる義務」は、子どもの権利保障のためではなく国家に対する義務だった。\n戦後は日本国憲法26条2項で、保護者が「その保護する子女」に対して負う義務へと転換した。その前提として、学校設置・授業料不徴収・児童労働禁止など行政の義務も予定されている。\n26条1項は「能力に応じて、ひとしく」教育を受ける権利を定め、旭川学力テスト事件最高裁判決（1976）は子どもの学習権を認めた。教育は法律で定める法律主義となった。",
+ k:["戦前：国家に対する義務","勅令主義（憲法に教育条項なし）","戦後：保護者が子どもに対して負う義務（26条2項）","行政の義務（学校設置・授業料不徴収など）","教育を受ける権利・学習権（旭川学テ判決）"]},
+{id:"e2",w:4,t:"旧教育基本法10条から新16条へ",p:"2006年の教育基本法改正で、旧10条（新16条）の内容はどう変わったか。その意味も含めて説明しなさい。",
+ m:"旧10条は、教育は「不当な支配に服することなく、国民全体に対し直接に責任を負つて」行われるべきとし、2項で教育行政の目標を「諸条件の整備確立」とした（行政は条件整備にとどまる）。\n2006年12月の改正で、新16条は「国民全体に対し直接に責任を負つて」を削り、「この法律及び他の法律の定めるところにより行われるべき」とした。2項では国が施策を総合的に策定・実施すると定めた。\nあわせて2条五号に「伝統と文化を尊重し、我が国と郷土を愛する態度」が入った。田中耕太郎は、教育は政治的干渉からも官僚的支配からも守られなければならないと述べていた。",
+ k:["旧：不当な支配に服することなく、国民全体に直接責任","旧：行政は条件整備にとどまる","新：「国民全体に対し直接に責任を負つて」を削除","新：法律の定めるところにより／国が施策を策定・実施","2条五号（愛国心・伝統と文化）"]},
+{id:"e3",w:3,t:"不登校をめぐる政策の変化",p:"不登校のとらえ方と国の政策は、どのように変わってきたか。説明しなさい。",
+ m:"1966年の新聞では「学校恐怖症」と呼ばれ、「甘やかしは禁物」など当事者や保護者を非難する論調が強かった。\n1992年、政府は不登校は「誰にでもおこりうる」とし、登校への促しが状況を悪化させる場合もあるとした。\n2016年には教育機会確保法が制定され、13条で休養の必要性と学校外の多様な学びへの情報提供・助言を定めた。同年度から調査名も変わり、通知で「問題行動ではない」と明示した。\nそれでも令和6年度の小中学校の不登校は過去最多の約35万4千人で、専門機関につながったのは約6割にとどまる。",
+ k:["1966年：学校恐怖症・本人や保護者を非難","1992年：誰にでもおこりうる","2016年：教育機会確保法（13条 休養の必要性）","問題行動ではない（調査名の変更）","現状：約35万4千人、支援につながるのは約6割"]},
+{id:"e4",w:3,t:"フリースクールの位置づけと課題",p:"フリースクールの制度上の位置づけと、公的支援の課題を説明しなさい。",
+ m:"フリースクールには法律上の定義がなく誰でも名乗れる。全国に約500か所あり、質の保証は公的に行われていない。\nフリースクールにだけ通う子どもも学籍は原籍校に残り、卒業も原籍校から。校長判断で出席扱いにでき、学習成果が指導要録に反映された子は約8万1千人（令和6年度）。\n国による一律の補助制度はなく、東京都の補助は月2万円（利用料は月4〜5万円）。長野県や尼崎市は認証・認定制度を設けた。公立学校には児童一人あたり年約94万円の公費が投入されており、その差は大きい。",
+ k:["法的定義なし・約500か所・質保証なし","学籍は原籍校／校長判断で出席扱い","国の一律補助なし（東京都 月2万円）","長野県・尼崎市の認証制度","公立校の公費 年約94万円との対比"]},
+{id:"e5",w:4,t:"英国アカデミーの特徴と問題",p:"英国のアカデミーとはどのような学校か。導入の経緯と問題点を説明しなさい。",
+ m:"アカデミーは2002年に法制化され、困難地域の中等学校の立て直しのために導入された。運営はアカデミー・トラスト（有限責任保証会社）で、ナショナル・カリキュラムや全国共通教員給与基準を守る義務がなく、教員資格も不要。\n2010年以降の保守連立政権下で、Ofstedの評価が悪い学校を傘下に入れる強制的アカデミー化が進み、巨大チェーン化（MAT）した。2009年度203校から2021年1月には9444校となり、中等段階では公的セクターの7割程度に達した。\n背景にはサッチャー改革（学校選択制、ナショナル・カリキュラムとテスト、Ofsted）やブレアの「教育、教育、教育」がある。『学力工場の社会学』は「成功例」とされた校の規律主義が人種・階級による偏りを帯びていたことを描いた。",
+ k:["2002年法制化・困難地域の中等学校","トラスト運営、NC・給与基準・教員資格の義務なし","強制的アカデミー化・MAT（2010〜）","203校→9444校、中等の7割","規律主義の偏り（学力工場の社会学）"]},
+{id:"e6",w:4,t:"学習指導要領の性格と旭川学テ判決",p:"学習指導要領の法的な性格はどう変わったか。旭川学テ判決の内容とあわせて説明しなさい。",
+ m:"1947年の学習指導要領は「試案」で、「型のとおりにやるのなら教師は機械にすぎない」と書かれ、教師自身が研究していく手引きだった。\n1958年以降は告示化され、法的拘束力が主張された。教科書検定の強化・全国学力テストも進んだ。\n1976年5月21日の旭川学テ最高裁判決は、国の教育内容への介入は一切排除されるわけではないとしつつ、教師の創意工夫や地方自治の原則を考慮し、機会均等と全国水準のため必要かつ合理的な「大綱的」基準にとどめるべきとした。\n2007年には全国学力テストが復活し、学校間の競争意識が内面化された。",
+ k:["1947年：試案（教師の研究の手引き）","1958年〜：告示化・法的拘束力","旭川学テ判決（1976）：大綱的基準にとどめる","教師の創意工夫・地方自治への配慮","2007年：全国学テ復活"]},
+{id:"e7",w:4,t:"新自由主義的教育改革",p:"ロールバック型とロールアウト型の新自由主義の違いを説明し、日本の教育改革の流れに触れなさい。",
+ m:"ロールバック型は規制緩和・小さな政府・緊縮財政・自己責任を特徴とする。ロールアウト（伸展）型は、国家が市場活用のために社会へ能動的に介入し、補助金と評価で統治する。コミュニティ活性化、自助・共助、レジリエンスが強調される。\n児美川によれば日本は、第1期（1980年代〜90年代半ば）臨教審で「塾を学校に！」などが主張されたが民間と公教育の区分は強く意識された。第2期（90年代末〜2010年代後半）に学校選択制、学テ、国庫負担率削減、教員評価、学校評価、民間人校長などが実現。第3期（2010年代後半〜）はGIGAスクール・EdTechで官民の境界が曖昧になった。\n新保守主義（道徳的権威主義、愛国心、国の統制・政治介入）とも共振している。",
+ k:["ロールバック：規制緩和・小さな政府・自己責任","ロールアウト：国家が能動介入、補助金と評価で統治","第1期：臨教審「塾を学校に」","第2期：学校選択制・学テ・国庫負担率削減など","第3期：GIGA・EdTech／新保守主義との共振"]}
+];
+
+// ---- 保存（使えない環境でも画面は動くように、すべて try/catch）
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const K={miss:"edu213.miss",srs:"edu213.srs",stat:"edu213.stat",essay:"edu213.essay",pref:"edu213.pref"};
+// 旧版（edu213miss / edu213srs は配列の順番で保存）を固定idに読み替える。旧キーは消さずに残す
+(function migrate(){
+  if(LS.get(K.srs,null)!==null||LS.get(K.miss,null)!==null)return;
+  const m=LS.get("edu213miss",[]),s=LS.get("edu213srs",{}),ns={};
+  for(const n in s)if(LEGACY[+n])ns[LEGACY[+n]]=s[n];
+  LS.set(K.miss,m.map(n=>LEGACY[n]).filter(Boolean));LS.set(K.srs,ns);
+})();
+const QI=Object.fromEntries(Q.map(q=>[q.id,q]));
+const miss=new Set(LS.get(K.miss,[]).filter(id=>QI[id]));
+let srs=LS.get(K.srs,{}),stat=LS.get(K.stat,{}),essay=LS.get(K.essay,{});
+const pref=Object.assign({theme:"auto",tab:"home",week:0,count:10,src:"all"},LS.get(K.pref,{}));
+const saveMiss=()=>LS.set(K.miss,[...miss]),saveSrs=()=>LS.set(K.srs,srs),saveStat=()=>LS.set(K.stat,stat),saveEssay=()=>LS.set(K.essay,essay),savePref=()=>LS.set(K.pref,pref);
+
+// ---- 小道具
+const $=s=>document.querySelector(s),V=$("#view");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuf=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
+const inW=w=>x=>!w||x.w==w;
+const ansText=q=>q.t==="x"?(q.a===0?"○":"×"):q.o[q.a];
+const WS={0:"全部",1:"第1回",2:"第2回補足",3:"第3回",4:"第4回"};
+const I={
+ home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+ quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5v.7M12 17h.01"/>',
+ swipe:'<rect x="6" y="3" width="12" height="16" rx="2"/><path d="M3 8v10a3 3 0 0 0 3 3h9"/>',
+ book:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H20"/>',
+ pen:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ undo:'<path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+ left:'<path d="M15 5l-7 7 7 7"/>',right:'<path d="M9 5l7 7-7 7"/>',
+ flip:'<path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/>'};
+const ic=(n,c="ico")=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+let toastT;function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("on"),1800)}
+function chips(name,items,cur){return `<div class="row" role="group" aria-label="${name}">${items.map(([v,l,n])=>`<button class="chip" data-v="${v}" aria-pressed="${v==cur}" ${n===0&&v!=cur?"disabled":""}>${l}${n!=null?`<span class="n">${n}</span>`:""}</button>`).join("")}</div>`}
+function onChips(root,fn){root.querySelectorAll(".chip").forEach(b=>b.onclick=()=>fn(b.dataset.v))}
+const weekChips=(cur,count)=>chips("範囲",[0,1,2,3,4].map(w=>[w,WS[w],count?count(w):null]),cur);
+
+// ---- SM-2（スワイプ復習）
+const DAY=864e5,NEW_MAX=20; // 新しいカードは1回20枚まで（多すぎると復習が回らない）
+function sm2(id,good){
+  const r=Object.assign({ef:2.5,n:0,iv:0,due:0},srs[id]);
+  if(good){r.n++;r.iv=r.n===1?1:r.n===2?3:Math.round(r.iv*r.ef);r.ef=Math.max(1.3,+(r.ef+0.1).toFixed(2))}
+  else{r.n=0;r.iv=0;r.ef=Math.max(1.3,+(r.ef-0.2).toFixed(2))}
+  r.due=Date.now()+(good?r.iv*DAY:60e3);srs[id]=r;saveSrs();
+}
+const isDue=(q,now=Date.now())=>!srs[q.id]||srs[q.id].due<=now;
+function reviewDeck(w){
+  const now=Date.now(),pool=Q.filter(inW(w)).filter(q=>isDue(q,now));
+  // 期限が来た復習（期限の早い順）を先に、そのあと未学習（シャッフル）
+  return pool.filter(q=>srs[q.id]).sort((a,b)=>srs[a.id].due-srs[b.id].due).concat(shuf(pool.filter(q=>!srs[q.id])).slice(0,NEW_MAX));
+}
+const mastered=q=>(srs[q.id]&&srs[q.id].n>0)||(stat[q.id]&&stat[q.id].last&&!miss.has(q.id));
+const accuracy=q=>{const s=stat[q.id];return s&&s.t?s.c/s.t:null};
+
+// ---- 画面の切り替え
+const TABS=[["home","ホーム","home"],["quiz","クイズ","quiz"],["review","復習","swipe"],["terms","用語","book"],["essay","記述","pen"]];
+let keyFn=null;
+document.addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest("textarea,input"))return;keyFn&&keyFn(e)});
+function go(t,arg){
+  pref.tab=t;savePref();keyFn=null;
+  $("#ttl").textContent=TABS.find(x=>x[0]===t)[1]==="ホーム"?"テスト対策":({quiz:"クイズ",review:"スワイプ復習",terms:"用語",essay:"記述式の練習"})[t];
+  renderTabs();window.scrollTo(0,0);VIEWS[t](arg);$("#ttl").focus({preventScroll:true});
+}
+function renderTabs(){
+  const due=Q.filter(q=>srs[q.id]&&srs[q.id].due<=Date.now()).length;
+  $("#tabs").innerHTML=TABS.map(([k,l,i])=>`<button data-t="${k}" ${pref.tab===k?'aria-current="page"':""}>${ic(i)}${l}${k==="review"&&due?`<span class="dot">${due>99?"99+":due}</span>`:""}</button>`).join("");
+  $("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>go(b.dataset.t));
+}
+function applyTheme(){
+  const r=document.documentElement;if(pref.theme==="auto")r.removeAttribute("data-theme");else r.dataset.theme=pref.theme;
+  const dark=pref.theme==="dark"||(pref.theme==="auto"&&matchMedia("(prefers-color-scheme:dark)").matches);
+  document.querySelector('meta[name="theme-color"]').content=dark?"#16171b":"#f2f3f6";
+}
+
+// ---- ホーム
+function home(){
+  const now=Date.now(),due=Q.filter(q=>srs[q.id]&&srs[q.id].due<=now).length,fresh=Q.filter(q=>!srs[q.id]).length;
+  const tot=Q.length,mas=Q.filter(mastered).length;
+  const next=Object.values(srs).map(r=>r.due).filter(d=>d>now).sort((a,b)=>a-b)[0];
+  const essDone=E.filter(e=>essay[e.id]&&essay[e.id].score!=null).length;
+  V.innerHTML=`<div class="list">
+  <section class="card"><div class="meta"><span>今日の復習</span><span>${new Date().toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"})}</span></div>
+    <div class="hero"><div><div class="big">${due}<small>枚</small></div><p class="note">${due?"期限が来た復習カード":"期限が来たカードはありません"}${fresh?`／未学習 ${fresh}枚`:""}</p></div></div>
+    <button class="btn wide" id="hRev">${ic("swipe")}${due?"復習をはじめる":fresh?"新しいカードを覚える":"もう一度チェックする"}</button>
+    ${!due&&next?`<p class="note">次の復習：${fmtDate(next)}</p>`:""}
+  </section>
+  <section class="card"><div class="between"><h2>間違えた問題</h2><span class="num">${miss.size}問</span></div>
+    ${miss.size?`<button class="btn ghost wide" id="hMiss">${ic("quiz")}間違えた問題だけ解き直す</button>`:`<p class="note">クイズで間違えた問題がここにたまります。正解すると外れます。</p>`}
+  </section>
+  <section class="card"><div class="between"><h2>範囲ごとの進み具合</h2><span class="num note">${mas} / ${tot}</span></div>
+    <div>${[1,2,3,4].map(w=>{const qs=Q.filter(q=>q.w==w),m=qs.filter(mastered).length;
+      return `<button class="wk" data-w="${w}"><span class="t">${esc(W[w])}</span><span class="num">${m} / ${qs.length}</span><span class="prog ${m===qs.length?"ok":""}"><i style="width:${m/qs.length*100}%"></i></span></button>`}).join("")}</div>
+    <p class="note">「覚えた」＝スワイプ復習で覚えた、またはクイズで直近に正解した問題。タップするとその回のクイズへ。</p>
+  </section>
+  <section class="card"><div class="between"><h2>記述式</h2><span class="num note">${essDone} / ${E.length} 論点</span></div>
+    <button class="btn plain wide" id="hEss">${ic("pen")}論点を自分の言葉で説明する</button></section>
+  <section class="card"><h2>設定</h2>
+    <div><div class="lbl">画面の色</div>${chips("画面の色",[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]],pref.theme)}</div>
+    <div id="reset"><button class="btn plain wide" id="rs">記録をリセット…</button></div>
+    <p class="note">記録はこのブラウザの中だけに保存されます。</p></section></div>`;
+  $("#hRev").onclick=()=>go("review",{w:0});
+  if($("#hMiss"))$("#hMiss").onclick=()=>startQuiz({w:0,src:"miss",count:0});
+  $("#hEss").onclick=()=>go("essay");
+  V.querySelectorAll(".wk").forEach(b=>b.onclick=()=>{pref.week=+b.dataset.w;go("quiz")});
+  onChips(V.querySelector('[aria-label="画面の色"]').parentNode,v=>{pref.theme=v;savePref();applyTheme();home()});
+  $("#rs").onclick=()=>{$("#reset").innerHTML=`<div class="confirm"><b>どの記録を消しますか？</b><p class="note" style="color:var(--ink)">消した記録は元に戻せません。</p>
+    <button class="btn plain wide" data-r="miss">間違えた問題だけ（${miss.size}問）</button>
+    <button class="btn danger wide" data-r="all">すべての記録</button>
+    <button class="btn ghost wide" data-r="no">やめる</button></div>`;
+    $("#reset").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const r=b.dataset.r;
+      if(r==="miss"){miss.clear();saveMiss();toast("間違えた問題を消しました")}
+      if(r==="all"){miss.clear();srs={};stat={};essay={};saveMiss();saveSrs();saveStat();saveEssay();toast("すべての記録を消しました")}
+      renderTabs();home()})};
+}
+const fmtDate=t=>new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
+
+// ---- クイズ
+let QZ=null;
+function quizPool(w,src){
+  let pool=Q.filter(inW(w));
+  if(src==="miss")pool=pool.filter(q=>miss.has(q.id));
+  if(src==="weak"){ // 正答率が低い順。未回答は真ん中あつかい
+    return shuf(pool).sort((a,b)=>(accuracy(a)??.5)-(accuracy(b)??.5)||(stat[a.id]?.t||0)-(stat[b.id]?.t||0));
+  }
+  return shuf(pool);
+}
+function quiz(){
+  if(QZ&&!QZ.done)return runQuiz();
+  const w=pref.week,src=pref.src,c=pref.count;
+  const n=quizPool(w,src).length,real=c?Math.min(c,n):n;
+  V.innerHTML=`<section class="card">
+   <div><div class="lbl">範囲</div>${weekChips(w,x=>Q.filter(inW(x)).length)}</div>
+   <div><div class="lbl">出し方</div>${chips("出し方",[["all","ランダム"],["weak","苦手から"],["miss","間違えた問題",Q.filter(inW(w)).filter(q=>miss.has(q.id)).length]],src)}</div>
+   <div><div class="lbl">問題数</div>${chips("問題数",[[10,"10問"],[20,"20問"],[0,"全部"]],c)}</div>
+   <button class="btn wide" id="st" ${real?"":"disabled"}>${real?`${real}問はじめる`:src==="miss"?"この範囲で間違えた問題はありません":"問題がありません"}</button>
+   <p class="note kbd">キーボード：1〜4 で選択、0 でわからない、Enter で次へ</p></section>`;
+  const g=V.querySelectorAll('[role="group"]');
+  onChips(g[0],v=>{pref.week=+v;savePref();quiz()});
+  onChips(g[1],v=>{pref.src=v;savePref();quiz()});
+  onChips(g[2],v=>{pref.count=+v;savePref();quiz()});
+  $("#st").onclick=()=>startQuiz({w,src,count:c});
+  keyFn=e=>{if(e.key==="Enter"&&real){e.preventDefault();startQuiz({w,src,count:c})}};
+}
+function startQuiz(o,list){
+  let l=list||quizPool(o.w,o.src);if(!list&&o.count)l=l.slice(0,o.count);
+  QZ={o,list:l,i:0,score:0,wrong:[],done:false};
+  if(pref.tab!=="quiz"){pref.tab="quiz";savePref()}
+  go("quiz");
+}
+function runQuiz(){
+  const z=QZ;if(z.i>=z.list.length)return quizResult();
+  const q=z.list[z.i],tf=q.t==="x",order=tf?[0,1]:shuf([0,1,2,3]);z.order=order;z.answered=false;
+  V.innerHTML=`<section class="card">
+   <div class="meta"><span class="tag">${esc(W[q.w])}</span><span>${z.i+1} / ${z.list.length}</span></div>
+   <div class="prog"><i style="width:${z.i/z.list.length*100}%"></i></div>
+   <p class="q">${esc(q.q)}</p>
+   <div class="${tf?"tfrow":"opts"}">${order.map((o,n)=>`<button class="opt" data-o="${o}">${tf?"":`<span class="k">${n+1}</span>`}<span>${esc(tf?["○","×"][o]:q.o[o])}</span></button>`).join("")}</div>
+   <div id="fb"></div>
+   <button class="btn plain wide" id="dk">わからない</button>
+   <div class="between"><button class="link" id="qt">やめて結果を見る</button><span class="num note">正解 ${z.score} / ${z.i}</span></div>
+   <button class="btn wide" id="nx" hidden>次へ</button></section>`;
+  V.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.o));
+  $("#nx").onclick=nextQ;$("#dk").onclick=()=>answer(-1);$("#qt").onclick=()=>{z.list=z.list.slice(0,z.i+(z.answered?1:0));quizResult()};
+  keyFn=e=>{
+    if(z.answered){if(e.key==="Enter"||e.key===" "){e.preventDefault();nextQ()}return}
+    if(e.key==="0"||e.key==="?")return answer(-1);
+    const n=tf?({"1":0,"2":1,o:0,x:1})[e.key.toLowerCase()]:"1234".indexOf(e.key);
+    if(n!=null&&n>=0&&order[n]!=null)answer(order[n]);
+  };
+}
+function nextQ(){QZ.i++;runQuiz();window.scrollTo(0,0)}
+function answer(o){
+  const z=QZ;if(z.answered)return;z.answered=true;
+  const q=z.list[z.i],ok=o===q.a,s=stat[q.id]||{c:0,t:0};
+  s.t++;if(ok)s.c++;s.last=ok;stat[q.id]=s;saveStat();
+  if(ok){z.score++;if(miss.delete(q.id))toast("間違えた問題から外しました")}
+  else{miss.add(q.id);z.wrong.push({q,o});sm2(q.id,false)} // 間違えた問題はスワイプ復習にもすぐ出す
+  saveMiss();
+  V.querySelectorAll(".opt").forEach(b=>{b.disabled=true;const v=+b.dataset.o;if(v===q.a)b.classList.add("ok");else if(v===o)b.classList.add("ng");else b.classList.add("dim")});
+  $("#dk").hidden=true;
+  $("#fb").innerHTML=`<div class="exp ${ok?"ok":"ng"}"><b>${ok?"正解":(o<0?"答えは":"不正解　正解は")+"「"+esc(ansText(q))+"」"}</b>${esc(q.e)}</div>`;
+  const nx=$("#nx");nx.hidden=false;nx.textContent=z.i+1<z.list.length?"次へ":"結果を見る";nx.focus({preventScroll:true});
+  V.querySelector(".between .num").textContent=`正解 ${z.score} / ${z.i+1}`;
+  nx.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+function quizResult(){
+  const z=QZ;z.done=true;const n=z.list.length,r=n?Math.round(z.score/n*100):0;
+  V.innerHTML=`<div class="list"><section class="card">
+   <div class="meta"><span>結果</span><span>${WS[z.o.w]}・${({all:"ランダム",weak:"苦手から",miss:"間違えた問題",retry:"解き直し"})[z.o.src]}</span></div>
+   <div class="big">${r}<small>%</small></div><div class="prog ${r>=80?"ok":""}"><i style="width:${r}%"></i></div>
+   <p class="note">${n}問中 ${z.score}問正解。${r===100&&n?"全問正解です。":r>=80?"あと少し。間違えた問題を確認しましょう。":"解説を読んでから、間違えた問題を解き直しましょう。"}</p>
+   ${z.wrong.length?`<button class="btn wide" id="rw">${ic("quiz")}今間違えた ${z.wrong.length}問を解き直す</button>`:""}
+   <div class="grade"><button class="btn plain" id="rs2">条件を変える</button><button class="btn ghost" id="ra">もう一度</button></div></section>
+   ${z.wrong.length?`<h2 style="margin-top:4px">間違えた問題</h2><div class="list">${z.wrong.map(({q,o})=>`<div class="item"><div class="qq">${esc(q.q)}</div>
+     <div class="ee">あなたの答え：${o<0?"わからない":esc(q.t==="x"?["○","×"][o]:q.o[o])}</div><div class="aa">正解：${esc(ansText(q))}</div><div class="ee">${esc(q.e)}</div></div>`).join("")}</div>`:""}</div>`;
+  if($("#rw"))$("#rw").onclick=()=>startQuiz({...z.o,src:"retry"},shuf(z.wrong.map(x=>x.q)));
+  $("#ra").onclick=()=>startQuiz(z.o.src==="retry"?{w:pref.week,src:pref.src,count:pref.count}:z.o);
+  $("#rs2").onclick=()=>{QZ=null;quiz()};
+  keyFn=e=>{if(e.key==="Enter"){e.preventDefault();($("#rw")||$("#ra")).click()}};
+  window.scrollTo(0,0);renderTabs();
+}
+
+// ---- スワイプ復習
+let RV=null;
+function review(arg){
+  if(arg||!RV)RV={w:arg?arg.w:pref.week,list:null,i:0,hist:[],good:0,bad:0};
+  if(!RV.list)RV.list=reviewDeck(RV.w);
+  const r=RV;
+  if(r.i>=r.list.length)return reviewDone();
+  const q=r.list[r.i],s=srs[q.id],kind=!s?"新規":s.n===0?"もう一度":"復習";
+  V.innerHTML=`<div class="list">
+   <div>${weekChips(r.w,w=>w==r.w?r.list.length-r.i:reviewDeck(w).length)}</div>
+   <div class="meta"><span>残り ${r.list.length-r.i}枚</span><span><span style="color:var(--ok)">覚えた ${r.good}</span> · <span style="color:var(--ng)">まだ ${r.bad}</span></span></div>
+   <div class="deck"><span class="stamp l">まだ</span><span class="stamp r">覚えた</span>
+   <div class="fc" id="fc" role="button" tabindex="0" aria-label="カード。タップで答えを表示">
+     <span class="side">${esc(W[q.w])} · ${kind}</span>
+     <span class="front">${esc(q.q)}</span>
+     <span class="back" id="bk" hidden><span class="ans">${esc(ansText(q))}</span>${esc(q.e)}</span>
+     <span class="hint" id="hn">タップで答えを見る</span></div></div>
+   <div class="grade"><button class="btn ng" id="gn">${ic("x")}まだ</button><button class="btn okb" id="go">${ic("ok")}覚えた</button></div>
+   <div class="between"><button class="link" id="ud" ${r.hist.length?"":"disabled style='visibility:hidden'"}>${ic("undo")} 1枚もどす</button><span class="note kbd">Space 答え／← まだ／→ 覚えた／Z もどす</span></div></div>`;
+  onChips(V,v=>review({w:+v}));
+  const fc=$("#fc"),bk=$("#bk"),L=V.querySelector(".stamp.l"),R=V.querySelector(".stamp.r");
+  const flip=()=>{bk.hidden=!bk.hidden;$("#hn").textContent=bk.hidden?"タップで答えを見る":"左右にスワイプ、または下のボタンで判定"};
+  let x0=null,y0=0,dx=0,moved=false,busy=false;
+  const grade=g=>{if(busy)return;busy=true;
+    r.hist.push({id:q.id,prev:srs[q.id]?{...srs[q.id]}:null,g,len:r.list.length});
+    sm2(q.id,g);g?r.good++:r.bad++;
+    if(!g)r.list.push(q); // 「まだ」は今回の最後にもう一度
+    fc.style.transition="transform .2s,opacity .2s";fc.style.transform=`translateX(${g?110:-110}%) rotate(${g?8:-8}deg)`;fc.style.opacity=".4";
+    setTimeout(()=>{r.i++;review();renderTabs()},170)};
+  fc.onpointerdown=e=>{x0=e.clientX;y0=e.clientY;dx=0;moved=false;fc.setPointerCapture(e.pointerId);fc.style.transition="none"};
+  fc.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;if(Math.abs(dx)>8||Math.abs(e.clientY-y0)>8)moved=true;
+    fc.style.transform=`translateX(${dx}px) rotate(${dx/24}deg)`;L.style.opacity=Math.min(1,-dx/80);R.style.opacity=Math.min(1,dx/80)};
+  const up=()=>{if(x0===null)return;x0=null;L.style.opacity=R.style.opacity=0;
+    if(Math.abs(dx)>90)return grade(dx>0);
+    fc.style.transition="transform .15s";fc.style.transform="";if(!moved)flip()};
+  fc.onpointerup=up;fc.onpointercancel=()=>{x0=null;fc.style.transform="";L.style.opacity=R.style.opacity=0};
+  $("#gn").onclick=()=>grade(false);$("#go").onclick=()=>grade(true);
+  $("#ud").onclick=undo;
+  keyFn=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}else if(e.key==="ArrowRight")grade(true);else if(e.key==="ArrowLeft")grade(false);else if(e.key==="z"||e.key==="Backspace")undo()};
+}
+function undo(){
+  const r=RV,h=r.hist.pop();if(!h)return;
+  if(h.prev)srs[h.id]=h.prev;else delete srs[h.id];saveSrs();
+  h.g?r.good--:r.bad--;r.list.length=h.len;r.i--;review();renderTabs();
+}
+function reviewDone(){
+  const r=RV,all=Q.filter(inW(r.w)),learned=all.filter(q=>srs[q.id]&&srs[q.id].n>0).length;
+  const next=all.map(q=>srs[q.id]?.due).filter(d=>d>Date.now()).sort((a,b)=>a-b)[0];
+  V.innerHTML=`<section class="card"><div class="meta"><span>${r.hist.length?"今日の復習おわり":"今は復習するカードがありません"}</span><span>${WS[r.w]}</span></div>
+   <div class="big">${learned}<small>/ ${all.length}</small></div><div class="prog ok"><i style="width:${learned/all.length*100}%"></i></div>
+   <p class="note">覚えたカードの数です。${r.hist.length?`今回：覚えた ${r.good}・まだ ${r.bad}。`:""}次の復習は ${next?fmtDate(next):"—"}。</p>
+   ${r.w?"":""}<div>${weekChips(r.w,w=>reviewDeck(w).length)}</div>
+   <div class="grade"><button class="btn plain" id="toQ">クイズで確認</button><button class="btn" id="re">もう一度チェック</button></div></section>`;
+  onChips(V,v=>review({w:+v}));
+  $("#re").onclick=()=>review({w:r.w});$("#toQ").onclick=()=>{pref.week=r.w;QZ=null;go("quiz")};
+  keyFn=null;
+}
+
+// ---- 用語（カード／検索）
+let TM={w:0,mode:"card",i:0,qs:""};
+function terms(){
+  const t=TM;
+  V.innerHTML=`<div class="list">
+   <div class="sbox">${ic("search")}<input class="search" id="sq" type="search" placeholder="用語・数字・人名でさがす（例：13条、94万）" value="${esc(t.qs)}" enterkeyhint="search" autocomplete="off"></div>
+   <div id="tbody"></div></div>`;
+  const sq=$("#sq");sq.oninput=()=>{t.qs=sq.value;body()};
+  body();
+  function body(){
+    const B=$("#tbody");
+    if(t.qs.trim())return search(B,t.qs.trim());
+    let list=C.filter(inW(t.w));if(!list.length){t.w=0;list=C}if(t.i>=list.length)t.i=0;
+    const c=list[t.i];
+    B.innerHTML=`<div class="list"><div>${weekChips(t.w,w=>C.filter(inW(w)).length)}</div>
+     <div class="fc" id="fc" role="button" tabindex="0" aria-label="用語カード。タップで裏返す">
+      <span class="side">${esc(W[c.w])} · ${t.i+1} / ${list.length}</span>
+      <span class="front">${esc(c.f)}</span><span class="back" id="bk" hidden>${esc(c.b)}</span>
+      <span class="hint" id="hn">タップで裏返す・左右スワイプで移動</span></div>
+     <div class="grade"><button class="btn plain" id="pv">${ic("left")}前へ</button><button class="btn" id="nx">次へ${ic("right")}</button></div>
+     <button class="btn ghost wide" id="all">${ic("book")}この範囲を一覧で見る</button></div>`;
+    onChips(B,v=>{t.w=+v;t.i=0;body()});
+    const fc=$("#fc"),bk=$("#bk"),mv=d=>{t.i=(t.i+d+list.length)%list.length;body()};
+    const flip=()=>{bk.hidden=!bk.hidden;$("#hn").hidden=!bk.hidden};
+    let x0=null,dx=0;
+    fc.onpointerdown=e=>{x0=e.clientX;dx=0};fc.onpointermove=e=>{if(x0!==null)dx=e.clientX-x0};
+    fc.onpointerup=()=>{if(x0===null)return;x0=null;if(Math.abs(dx)>60)mv(dx<0?1:-1);else if(Math.abs(dx)<8)flip()};
+    $("#pv").onclick=()=>mv(-1);$("#nx").onclick=()=>mv(1);
+    $("#all").onclick=()=>{B.innerHTML=`<div class="list"><button class="btn plain wide" id="bc">${ic("left")}カードにもどる</button>${list.map(c=>`<div class="item"><div class="qq">${esc(c.f)}</div><div class="ee" style="color:var(--ink)">${esc(c.b)}</div></div>`).join("")}</div>`;$("#bc").onclick=body;keyFn=null};
+    keyFn=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}else if(e.key==="ArrowRight")mv(1);else if(e.key==="ArrowLeft")mv(-1);else if(e.key==="/"){e.preventDefault();sq.focus()}};
+  }
+  function search(B,s){
+    keyFn=null;
+    const words=s.toLowerCase().split(/\s+/),hit=x=>words.every(w=>x.toLowerCase().includes(w));
+    const hl=x=>{let h=esc(x);for(const w of words){if(!w)continue;h=h.replace(new RegExp(esc(w).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),m=>`<mark>${m}</mark>`)}return h};
+    const cs=C.filter(c=>hit(c.f+" "+c.b)),qs=Q.filter(q=>hit(q.q+" "+ansText(q)+" "+q.e));
+    B.innerHTML=`<p class="note">用語カード ${cs.length}件・問題 ${qs.length}件</p><div class="list" style="margin-top:10px">
+      ${cs.map(c=>`<div class="item"><span class="tag">${WS[c.w]}・カード</span><div class="qq" style="margin-top:6px">${hl(c.f)}</div><div class="ee" style="color:var(--ink)">${hl(c.b)}</div></div>`).join("")}
+      ${qs.map(q=>`<div class="item"><span class="tag">${WS[q.w]}・問題</span><div class="qq" style="margin-top:6px">${hl(q.q)}</div><div class="aa">${hl(ansText(q))}</div><div class="ee">${hl(q.e)}</div></div>`).join("")}
+      ${!cs.length&&!qs.length?`<div class="item">見つかりませんでした。言葉を短くしてみてください。</div>`:""}</div>`;
+  }
+}
+
+// ---- 記述式
+function essayView(arg){
+  if(arg&&arg.id)return essayOne(E.find(e=>e.id===arg.id));
+  V.innerHTML=`<div class="list"><p class="note">論点を自分の言葉で説明してから、模範解答と見くらべます。チェック項目のうち、書けたものを自分で選んで記録します。</p>
+   ${E.map(e=>{const s=essay[e.id],sc=s&&s.score!=null?s.score:null;
+    return `<button class="item" data-id="${e.id}" style="text-align:left;width:100%;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:56px">
+     <span><span class="tag">${WS[e.w]}</span><span style="display:block;font-weight:700;margin-top:4px">${esc(e.t)}</span></span>
+     <span class="badge ${sc==null?"":sc===e.k.length?"ok":"mid"}">${sc==null?(s&&s.draft?"下書き":"未"):`${sc}/${e.k.length}`}</span></button>`}).join("")}</div>`;
+  V.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>essayOne(E.find(e=>e.id===b.dataset.id)));
+}
+function essayOne(e){
+  const s=essay[e.id]||(essay[e.id]={draft:"",checks:[],score:null});
+  let shown=false,hint=false;
+  const draw=()=>{
+    V.innerHTML=`<div class="list"><button class="link" id="bk" style="align-self:flex-start">${ic("left")} 論点の一覧</button>
+     <section class="card"><div class="meta"><span class="tag">${esc(W[e.w])}</span>${s.score!=null?`<span>前回 ${s.score}/${e.k.length}</span>`:""}</div>
+      <h2 style="font-size:18px">${esc(e.t)}</h2><p style="margin:0">${esc(e.p)}</p>
+      <textarea id="ta" placeholder="ここに書く（頭の中で説明するだけでもOK）">${esc(s.draft||"")}</textarea>
+      <div class="between"><span class="note" id="cnt">${(s.draft||"").length}字</span><span class="note">自動で保存</span></div>
+      ${shown?"":`${hint?`<div class="model" style="font-size:14px">${e.k.map(k=>"・"+esc(k.split("：")[0].split("（")[0])).join("\n")}</div>`:`<button class="btn plain wide" id="hi">ヒント（キーワードだけ）</button>`}<button class="btn wide" id="sh">模範解答とチェック項目を見る</button>`}</section>
+     ${shown?`<section class="card"><h2>模範解答</h2><div class="model">${esc(e.m)}</div></section>
+     <section class="card"><h2>書けた項目をタップ</h2><div class="list" id="pts">${e.k.map((k,n)=>`<button class="pt" data-n="${n}" aria-pressed="${s.checks.includes(n)}"><span class="box">${ic("ok","")}</span><span>${esc(k)}</span></button>`).join("")}</div>
+      <button class="btn wide" id="sv">記録する（<span id="sc">${s.checks.length}</span>/${e.k.length}）</button></section>`:""}</div>`;
+    $("#bk").onclick=()=>essayView();if($("#hi"))$("#hi").onclick=()=>{hint=true;draw()};
+    const ta=$("#ta");ta.oninput=()=>{s.draft=ta.value;$("#cnt").textContent=ta.value.length+"字";saveEssay()};
+    if($("#sh"))$("#sh").onclick=()=>{shown=true;draw();$("#pts").closest(".card").previousElementSibling.scrollIntoView({behavior:"smooth",block:"start"})};
+    if(shown){V.querySelectorAll(".pt").forEach(b=>b.onclick=()=>{const n=+b.dataset.n,i=s.checks.indexOf(n);i<0?s.checks.push(n):s.checks.splice(i,1);
+        b.setAttribute("aria-pressed",i<0);$("#sc").textContent=s.checks.length;saveEssay()});
+      $("#sv").onclick=()=>{s.score=s.checks.length;s.at=Date.now();saveEssay();toast(`記録しました（${s.score}/${e.k.length}）`);
+        const n=E.indexOf(e),nx=E[n+1];nx?essayOne(nx):essayView()}}
+  };
+  keyFn=null;draw();window.scrollTo(0,0);
+}
+
+const VIEWS={home,quiz,review,terms,essay:essayView};
+applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);
+setInterval(renderTabs,30e3);
+go(TABS.some(t=>t[0]===pref.tab)?pref.tab:"home");
+</script>
+</body>
+</html>
