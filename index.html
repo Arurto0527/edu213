@@ -586,15 +586,21 @@ function quizPool(w,src){
   if(src==="weak"){ // 正答率が低い順。未回答は真ん中あつかい
     return shuf(pool).sort((a,b)=>(accuracy(a)??.5)-(accuracy(b)??.5)||(stat[a.id]?.t||0)-(stat[b.id]?.t||0));
   }
+  if(src==="seq"){ // 順番：レジュメの回の順に、前回の続きから
+    pool=pool.slice().sort((a,b)=>a.w-b.w);const p=seqPos()%Math.max(1,pool.length);
+    return pool.slice(p).concat(pool.slice(0,p));
+  }
   return shuf(pool);
 }
+const seqKey=()=>pref.week+"/"+(pref.type||"");
+const seqPos=()=>(pref.seq||{})[seqKey()]||0;
 function quiz(){
   if(QZ&&!QZ.done)return runQuiz();
   const w=pref.week,src=pref.src,c=pref.count;
   const n=quizPool(w,src).length,real=src==="mock"?n:c?Math.min(c,n):n;
   V.innerHTML=`<section class="card">
    <div><div class="lbl">範囲</div>${weekChips(w,x=>Q.filter(inW(x)).length)}</div>
-   <div><div class="lbl">出し方</div>${chips("出し方",[["mock","本番形式の模試"],["all","ランダム"],["weak","苦手から"],["miss","間違えた問題",Q.filter(inW(w)).filter(q=>miss.has(q.id)).length]],src)}</div>
+   <div><div class="lbl">出し方</div>${chips("出し方",[["mock","本番形式の模試"],["seq","順番"],["all","ランダム"],["weak","苦手から"],["miss","間違えた問題",Q.filter(inW(w)).filter(q=>miss.has(q.id)).length]],src)}</div>
    ${src==="mock"?`<p class="note">過去問と同じ形式（すべて選ぶ1問・○×8問・穴埋め2題）を全範囲からランダムに出し、点数で表示します。論述（問5）は「記述」タブで。</p>`:`<div><div class="lbl">形式</div>${chips("形式",[["","すべて"],["m","4択"],["x","○×"],["s","すべて選ぶ"],["f","穴埋め"]],pref.type||"")}</div>
    <div><div class="lbl">問題数</div>${chips("問題数",[[10,"10問"],[20,"20問"],[0,"全部"]],c)}</div>`}
    <button class="btn wide" id="st" ${real?"":"disabled"}>${src==="mock"?"模試をはじめる":real?`${real}問はじめる`:src==="miss"?"この範囲で間違えた問題はありません":"問題がありません"}</button>
@@ -605,10 +611,13 @@ function quiz(){
   if(g[2])onChips(g[2],v=>{pref.type=v;savePref();quiz()});
   if(g[3])onChips(g[3],v=>{pref.count=+v;savePref();quiz()});
   $("#st").onclick=()=>startQuiz({w,src,count:c});
+  if(src==="seq"&&seqPos()){V.querySelector("#st").insertAdjacentHTML("afterend",`<div class="between"><span class="note">前回の続き（${seqPos()+1}問目）から</span><button class="link" id="sq0">最初から</button></div>`);
+    $("#sq0").onclick=()=>{pref.seq[seqKey()]=0;savePref();quiz()}}
   keyFn=e=>{if(e.key==="Enter"&&real){e.preventDefault();startQuiz({w,src,count:c})}};
 }
 function startQuiz(o,list){
   let l=list||quizPool(o.w,o.src);if(!list&&o.count&&o.src!=="mock")l=l.slice(0,o.count);
+  if(!list&&o.src==="seq"){const n=Q.filter(inW(o.w)).filter(q=>!pref.type||(q.t||"m")===pref.type).length;pref.seq=pref.seq||{};pref.seq[seqKey()]=(seqPos()+l.length)%Math.max(1,n);savePref()}
   QZ={o,list:l,i:0,score:0,pts:0,max:l.reduce((a,q)=>a+qPts(q),0),wrong:[],done:false};
   if(pref.tab!=="quiz"){pref.tab="quiz";savePref()}
   go("quiz");
@@ -849,7 +858,7 @@ const VIEWS={home,quiz,review,terms,essay:essayView};
 applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);
 setInterval(renderTabs,30e3);
 // 新しい版が公開されていたら知らせる（ブラウザが古い版を覚えていることがあるため）
-const APP_V="1793088604011";
+const APP_V="1793089128375";
 function checkVersion(){fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
   const m=t.match(/const APP_V="([^"]+)"/);if(!m||m[1]===APP_V||$("#upd"))return;
   document.body.insertAdjacentHTML("beforeend",`<button id="upd" class="btn" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));z-index:30;width:max-content;max-width:calc(100% - 32px)">新しい版があります — タップで更新</button>`);
