@@ -3,28 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f2f3f6">
+<meta name="theme-color" content="#ffffff">
 <title>EDU213 テスト対策</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* 一列の学習机。上に見出し、中央にカード、画面下にタブ。 */
 :root{
-  --bg:#f2f3f6; --paper:#ffffff; --ink:#1c1e24; --muted:#636875; --line:#dcdfe6;
-  --accent:#5b3ff2; --accent-soft:#ebe7fe; --on-accent:#ffffff;
-  --ok:#1f8a5b; --ok-soft:#e2f4ea; --ng:#c43c3c; --ng-soft:#fbe5e5; --warn:#a86a00;
+  --bg:#ffffff; --paper:#ffffff; --ink:#111111; --muted:#595959; --line:#e0e0e0;
+  --accent:#111111; --accent-soft:#f5f5f5; --on-accent:#ffffff;
+  --ok:#2c7a57; --ok-soft:#eef6f1; --ng:#dc2626; --ng-soft:#fdf0f0; --warn:#595959;
   --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,monospace;
   --navh:64px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#16171b; --paper:#1f2127; --ink:#e8e9ee; --muted:#9a9fab; --line:#30333b;
-  --accent:#8f7dff; --accent-soft:#2a2550; --on-accent:#16171b;
-  --ok:#5fcf97; --ok-soft:#173326; --ng:#f08585; --ng-soft:#3b1d1d; --warn:#e0a84a; color-scheme:dark}}
+  --bg:#121212; --paper:#121212; --ink:#f2f2f2; --muted:#b0b0b0; --line:#333333;
+  --accent:#f2f2f2; --accent-soft:#1c1c1c; --on-accent:#121212;
+  --ok:#7fcfaa; --ok-soft:#16241d; --ng:#f08585; --ng-soft:#2a1818; --warn:#b0b0b0; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#16171b; --paper:#1f2127; --ink:#e8e9ee; --muted:#9a9fab; --line:#30333b;
-  --accent:#8f7dff; --accent-soft:#2a2550; --on-accent:#16171b;
-  --ok:#5fcf97; --ok-soft:#173326; --ng:#f08585; --ng-soft:#3b1d1d; --warn:#e0a84a; color-scheme:dark}
+  --bg:#121212; --paper:#121212; --ink:#f2f2f2; --muted:#b0b0b0; --line:#333333;
+  --accent:#f2f2f2; --accent-soft:#1c1c1c; --on-accent:#121212;
+  --ok:#7fcfaa; --ok-soft:#16241d; --ng:#f08585; --ng-soft:#2a1818; --warn:#b0b0b0; color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
@@ -119,7 +119,7 @@ nav.tabs button{background:none;border:0;min-height:var(--navh);display:flex;fle
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
 nav.tabs .dot{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-family:var(--mono);font-size:10px;line-height:18px;text-align:center}
-.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;width:max-content;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1}
 .kbd{display:none}
 @media (hover:hover) and (pointer:fine){.kbd{display:block}}
@@ -342,7 +342,7 @@ function renderTabs(){
 function applyTheme(){
   const r=document.documentElement;if(pref.theme==="auto")r.removeAttribute("data-theme");else r.dataset.theme=pref.theme;
   const dark=pref.theme==="dark"||(pref.theme==="auto"&&matchMedia("(prefers-color-scheme:dark)").matches);
-  document.querySelector('meta[name="theme-color"]').content=dark?"#16171b":"#f2f3f6";
+  document.querySelector('meta[name="theme-color"]').content=dark?"#121212":"#ffffff";
 }
 
 // ---- ホーム
@@ -369,6 +369,7 @@ function home(){
     <button class="btn plain wide" id="hEss">${ic("pen")}論点を自分の言葉で説明する</button></section>
   <section class="card"><h2>設定</h2>
     <div><div class="lbl">画面の色</div>${chips("画面の色",[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]],pref.theme)}</div>
+    <div id="move"><button class="btn plain wide" id="mv">記録の引き継ぎ（書き出す・読みこむ）</button></div>
     <div id="reset"><button class="btn plain wide" id="rs">記録をリセット…</button></div>
     <p class="note">記録はこのブラウザの中だけに保存されます。</p></section></div>`;
   $("#hRev").onclick=()=>go("review",{w:0});
@@ -376,6 +377,7 @@ function home(){
   $("#hEss").onclick=()=>go("essay");
   V.querySelectorAll(".wk").forEach(b=>b.onclick=()=>{pref.week=+b.dataset.w;go("quiz")});
   onChips(V.querySelector('[aria-label="画面の色"]').parentNode,v=>{pref.theme=v;savePref();applyTheme();home()});
+  $("#mv").onclick=moveBox;
   $("#rs").onclick=()=>{$("#reset").innerHTML=`<div class="confirm"><b>どの記録を消しますか？</b><p class="note" style="color:var(--ink)">消した記録は元に戻せません。</p>
     <button class="btn plain wide" data-r="miss">間違えた問題だけ（${miss.size}問）</button>
     <button class="btn danger wide" data-r="all">すべての記録</button>
@@ -384,6 +386,38 @@ function home(){
       if(r==="miss"){miss.clear();saveMiss();toast("間違えた問題を消しました")}
       if(r==="all"){miss.clear();srs={};stat={};essay={};saveMiss();saveSrs();saveStat();saveEssay();toast("すべての記録を消しました")}
       renderTabs();home()})};
+}
+// ---- 記録の引き継ぎ。別のURL（Artifact版など）の記録は直接読めないので、文字にしてコピーで運ぶ
+const exportText=()=>"EDU213:"+btoa(unescape(encodeURIComponent(JSON.stringify({v:2,miss:[...miss],srs,stat,essay}))));
+function parseImport(t){
+  const m=t.trim().match(/EDU213:([A-Za-z0-9+/=]+)/);if(!m)return null;
+  try{return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}catch(e){return null}
+}
+function mergeImport(d){
+  const id=k=>d.v===1?LEGACY[+k]:QI[k]?k:null; // v1＝Artifact版（配列の順番）
+  let n=0;
+  (d.miss||[]).forEach(k=>{const i=id(k);if(i&&!miss.has(i)){miss.add(i);n++}});
+  for(const k in d.srs||{}){const i=id(k);if(!i)continue;const a=srs[i],b=d.srs[k];
+    if(!a||(b.n||0)>(a.n||0)||((b.n||0)===(a.n||0)&&b.due>a.due)){srs[i]=b;n++}} // 進んでいるほうを残す
+  for(const k in d.stat||{}){const i=id(k);if(i&&!stat[i]){stat[i]=d.stat[k];n++}}
+  for(const k in d.essay||{}){if(E.some(e=>e.id===k)&&!essay[k]){essay[k]=d.essay[k];n++}}
+  saveMiss();saveSrs();saveStat();saveEssay();return n;
+}
+function moveBox(){
+  const B=$("#move");
+  B.innerHTML=`<div class="confirm" style="background:var(--accent-soft);border-color:var(--line)">
+   <b>記録の引き継ぎ</b>
+   <p class="note" style="color:var(--ink)">前の版（Artifact）で「記録を書き出す」を押してコピーした文字を、下に貼りつけて「読みこむ」を押します。今の記録は消えず、合わせて残ります。</p>
+   <textarea id="imp" style="min-height:90px" placeholder="EDU213: で始まる文字を貼りつける"></textarea>
+   <button class="btn wide" id="ld">読みこむ</button>
+   <button class="btn plain wide" id="cp">この記録を書き出す（コピー）</button>
+   <button class="btn ghost wide" id="cl">閉じる</button></div>`;
+  $("#ld").onclick=()=>{const d=parseImport($("#imp").value);
+    if(!d){toast("読みこめませんでした。EDU213: から全部貼りつけてください");return}
+    const n=mergeImport(d);toast(n?`${n}件の記録を引き継ぎました`:"新しく足す記録はありませんでした");renderTabs();home()};
+  $("#cp").onclick=async()=>{const t=exportText();
+    try{await navigator.clipboard.writeText(t);toast("コピーしました")}catch(e){$("#imp").value=t;$("#imp").select();toast("文字を選んだので、コピーしてください")}};
+  $("#cl").onclick=home;
 }
 const fmtDate=t=>new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
 
