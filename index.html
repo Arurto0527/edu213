@@ -112,6 +112,9 @@ textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:
 .badge{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
 .badge.ok{color:var(--ok);border-color:var(--ok)}
 .badge.mid{color:var(--warn);border-color:var(--warn)}
+.chk{flex:none;width:32px;height:32px;border:1.5px solid var(--muted);border-radius:8px;background:transparent;display:grid;place-items:center;padding:0;color:transparent}
+.chk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2}
+.chk[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .confirm{border:1px solid var(--ng);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--ng-soft)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:10}
 nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);width:100%;max-width:640px}
@@ -534,11 +537,11 @@ function home(){
     <button class="btn ghost wide" data-r="no">やめる</button></div>`;
     $("#reset").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const r=b.dataset.r;
       if(r==="miss"){miss.clear();saveMiss();toast("間違えた問題を消しました")}
-      if(r==="all"){miss.clear();srs={};stat={};essay={};saveMiss();saveSrs();saveStat();saveEssay();toast("すべての記録を消しました")}
+      if(r==="all"){miss.clear();srs={};stat={};essay={};checks.clear();saveChk();saveMiss();saveSrs();saveStat();saveEssay();toast("すべての記録を消しました")}
       renderTabs();home()})};
 }
 // ---- 記録の引き継ぎ。別のURL（Artifact版など）の記録は直接読めないので、文字にしてコピーで運ぶ
-const exportText=()=>"EDU213:"+btoa(unescape(encodeURIComponent(JSON.stringify({v:2,miss:[...miss],srs,stat,essay}))));
+const exportText=()=>"EDU213:"+btoa(unescape(encodeURIComponent(JSON.stringify({v:2,miss:[...miss],srs,stat,essay,check:[...checks]}))));
 function parseImport(t){
   const m=t.trim().match(/EDU213:([A-Za-z0-9+/=]+)/);if(!m)return null;
   try{return JSON.parse(decodeURIComponent(escape(atob(m[1]))))}catch(e){return null}
@@ -550,6 +553,7 @@ function mergeImport(d){
   for(const k in d.srs||{}){const i=id(k);if(!i)continue;const a=srs[i],b=d.srs[k];
     if(!a||(b.n||0)>(a.n||0)||((b.n||0)===(a.n||0)&&b.due>a.due)){srs[i]=b;n++}} // 進んでいるほうを残す
   for(const k in d.stat||{}){const i=id(k);if(i&&!stat[i]){stat[i]=d.stat[k];n++}}
+  (d.check||[]).forEach(k=>{if(QI[k]&&!checks.has(k)){checks.add(k);n++}});saveChk();
   for(const k in d.essay||{}){if(E.some(e=>e.id===k)&&!essay[k]){essay[k]=d.essay[k];n++}}
   saveMiss();saveSrs();saveStat();saveEssay();return n;
 }
@@ -573,6 +577,14 @@ const fmtDate=t=>new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeri
 
 // ---- クイズ
 let QZ=null;
+// 番号：第1回から順に No.1〜（回の中はデータの順）。チェックは id で保存
+const ORDER=Q.slice().sort((a,b)=>a.w-b.w),NO=Object.fromEntries(ORDER.map((q,i)=>[q.id,i+1]));
+const checks=new Set(LS.get("edu213.check",[]).filter(id=>QI[id]));
+const saveChk=()=>LS.set("edu213.check",[...checks]);
+const toggleChk=id=>{checks.has(id)?checks.delete(id):checks.add(id);saveChk();return checks.has(id)};
+const chkBtn=id=>`<button class="chk" data-c="${id}" aria-pressed="${checks.has(id)}" aria-label="チェック">${ic("ok","")}</button>`;
+function bindChk(root){root.querySelectorAll(".chk").forEach(b=>b.onclick=e=>{e.stopPropagation();b.setAttribute("aria-pressed",toggleChk(b.dataset.c))})}
+const byChk=q=>!pref.chk||(pref.chk==="on"?checks.has(q.id):!checks.has(q.id));
 function mockSet(){ // 過去問と同じ配分：すべて選ぶ1・○×8・穴埋め2
   const pick=(t,n)=>shuf(Q.filter(q=>(q.t||"m")===t&&(t!=="f"||q.b.length>=3))).slice(0,n); // 穴埋めは本番と同じく空欄3つ以上の文章
   return [...pick("s",MOCK.s.n),...pick("x",MOCK.x.n),...pick("f",MOCK.f.n)];
@@ -582,18 +594,20 @@ function quizPool(w,src){
   if(src==="mock")return mockSet();
   let pool=Q.filter(inW(w));
   if(pref.type)pool=pool.filter(q=>(q.t||"m")===pref.type);
+  pool=pool.filter(byChk);
   if(src==="miss")pool=pool.filter(q=>miss.has(q.id));
   if(src==="weak"){ // 正答率が低い順。未回答は真ん中あつかい
     return shuf(pool).sort((a,b)=>(accuracy(a)??.5)-(accuracy(b)??.5)||(stat[a.id]?.t||0)-(stat[b.id]?.t||0));
   }
-  if(src==="seq"){ // 順番：レジュメの回の順に、前回の続きから
-    pool=pool.slice().sort((a,b)=>a.w-b.w);const p=seqPos()%Math.max(1,pool.length);
+  if(src==="seq"){ // 順番：番号順に、開始番号（前回の続き）から
+    pool=pool.slice().sort((a,b)=>NO[a.id]-NO[b.id]);let p=pool.findIndex(q=>NO[q.id]>=seqFrom());if(p<0)p=0;
     return pool.slice(p).concat(pool.slice(0,p));
   }
   return shuf(pool);
 }
-const seqKey=()=>pref.week+"/"+(pref.type||"");
-const seqPos=()=>(pref.seq||{})[seqKey()]||0;
+const seqKey=()=>pref.week+"/"+(pref.type||"")+"/"+(pref.chk||"");
+const seqFrom=()=>(pref.seqNo||{})[seqKey()]||1; // 次に始める番号
+const setFrom=n=>{pref.seqNo=pref.seqNo||{};pref.seqNo[seqKey()]=n;savePref()};
 function quiz(){
   if(QZ&&!QZ.done)return runQuiz();
   const w=pref.week,src=pref.src,c=pref.count;
@@ -602,6 +616,7 @@ function quiz(){
    <div><div class="lbl">範囲</div>${weekChips(w,x=>Q.filter(inW(x)).length)}</div>
    <div><div class="lbl">出し方</div>${chips("出し方",[["mock","本番形式の模試"],["seq","順番"],["all","ランダム"],["weak","苦手から"],["miss","間違えた問題",Q.filter(inW(w)).filter(q=>miss.has(q.id)).length]],src)}</div>
    ${src==="mock"?`<p class="note">過去問と同じ形式（すべて選ぶ1問・○×8問・穴埋め2題）を全範囲からランダムに出し、点数で表示します。論述（問5）は「記述」タブで。</p>`:`<div><div class="lbl">形式</div>${chips("形式",[["","すべて"],["m","4択"],["x","○×"],["s","すべて選ぶ"],["f","穴埋め"]],pref.type||"")}</div>
+   <div><div class="lbl">チェック</div>${chips("チェック",[["","すべて"],["on","✓ありだけ",Q.filter(inW(w)).filter(q=>checks.has(q.id)).length],["off","✓なしだけ"]],pref.chk||"")}</div>
    <div><div class="lbl">問題数</div>${chips("問題数",[[10,"10問"],[20,"20問"],[0,"全部"]],c)}</div>`}
    <button class="btn wide" id="st" ${real?"":"disabled"}>${src==="mock"?"模試をはじめる":real?`${real}問はじめる`:src==="miss"?"この範囲で間違えた問題はありません":"問題がありません"}</button>
    <p class="note kbd">キーボード：1〜4 で選択、0 でわからない、Enter で次へ</p></section>`;
@@ -609,15 +624,48 @@ function quiz(){
   onChips(g[0],v=>{pref.week=+v;savePref();quiz()});
   onChips(g[1],v=>{pref.src=v;savePref();quiz()});
   if(g[2])onChips(g[2],v=>{pref.type=v;savePref();quiz()});
-  if(g[3])onChips(g[3],v=>{pref.count=+v;savePref();quiz()});
+  if(g[3])onChips(g[3],v=>{pref.chk=v;savePref();quiz()});
+  if(g[4])onChips(g[4],v=>{pref.count=+v;savePref();quiz()});
   $("#st").onclick=()=>startQuiz({w,src,count:c});
-  if(src==="seq"&&seqPos()){V.querySelector("#st").insertAdjacentHTML("afterend",`<div class="between"><span class="note">前回の続き（${seqPos()+1}問目）から</span><button class="link" id="sq0">最初から</button></div>`);
-    $("#sq0").onclick=()=>{pref.seq[seqKey()]=0;savePref();quiz()}}
+  if(src==="seq"){V.querySelector("#st").insertAdjacentHTML("beforebegin",`<div class="between" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><span class="note" style="color:var(--ink)">開始番号 No.</span><input id="sqn" class="search" type="number" inputmode="numeric" min="1" max="${Q.length}" value="${seqFrom()}" style="width:96px;padding-left:12px;min-height:44px"><span class="note">から</span><button class="link" id="sq0">No.1にもどす</button></div>`);
+    $("#sqn").onchange=()=>{setFrom(Math.min(Q.length,Math.max(1,+$("#sqn").value||1)));quiz()};
+    $("#sq0").onclick=()=>{setFrom(1);quiz()}}
+  V.querySelector("section.card").insertAdjacentHTML("afterend",`<button class="btn plain wide" id="ql" style="margin-top:12px">${ic("book")}問題一覧（番号・チェック）</button>`);
+  $("#ql").onclick=()=>quizList();
   keyFn=e=>{if(e.key==="Enter"&&real){e.preventDefault();startQuiz({w,src,count:c})}};
+}
+let QLopen=new Set;
+function quizList(){
+  keyFn=null;const w=pref.week;
+  const list=ORDER.filter(inW(w)).filter(q=>!pref.type||(q.t||"m")===pref.type).filter(byChk);
+  const TN={m:"4択",x:"○×",s:"すべて選ぶ",f:"穴埋め"};
+  V.innerHTML=`<div class="list"><button class="link" id="qb" style="align-self:flex-start">${ic("left")} クイズの設定にもどる</button>
+   <section class="card" style="gap:10px">
+    <div>${weekChips(w,x=>Q.filter(inW(x)).length)}</div>
+    <div class="row" role="group" aria-label="形式">${[["","すべて"],["m","4択"],["x","○×"],["s","すべて選ぶ"],["f","穴埋め"]].map(([v,l])=>`<button class="chip" data-ty="${v}" aria-pressed="${(pref.type||"")===v}">${l}</button>`).join("")}</div>
+    <div class="row" role="group" aria-label="チェック">${[["","すべて"],["on","✓あり"],["off","✓なし"]].map(([v,l])=>`<button class="chip" data-ck="${v}" aria-pressed="${(pref.chk||"")===v}">${l}</button>`).join("")}</div>
+    <div class="between"><span class="note">${list.length}問表示・チェック ${checks.size}問（全${Q.length}問中）</span></div>
+    <div class="grade"><button class="btn plain" id="ca">全部に✓</button><button class="btn plain" id="cn">✓を全部外す</button></div>
+   </section>
+   <div class="list" id="qrows">${list.map(q=>`<div class="item qrow" data-id="${q.id}" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px">
+     ${chkBtn(q.id)}
+     <div style="flex:1;min-width:0;cursor:pointer" class="qx"><div class="meta" style="justify-content:flex-start;gap:8px"><b class="num" style="color:var(--ink)">No.${NO[q.id]}</b><span>${WS[q.w]}・${TN[q.t||"m"]}</span>${miss.has(q.id)?`<span style="color:var(--ng)">間違えた</span>`:""}</div>
+      <div class="qq" style="font-weight:500;white-space:pre-line;${QLopen.has(q.id)?"":"display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden"}">${esc(QLopen.has(q.id)?qText(q):q.q)}</div>
+      ${QLopen.has(q.id)?`<div class="aa" style="white-space:pre-line;margin-top:4px">${esc(ansText(q))}</div><div class="ee">${esc(q.e)}</div>`:""}</div>
+     <button class="link" data-from="${NO[q.id]}" style="flex:none;min-height:44px">ここから</button></div>`).join("")||`<div class="item">該当する問題はありません。</div>`}</div></div>`;
+  $("#qb").onclick=()=>quiz();
+  onChips(V.querySelector("section .row"),v=>{pref.week=+v;savePref();quizList()});
+  V.querySelectorAll("[data-ty]").forEach(b=>b.onclick=()=>{pref.type=b.dataset.ty;savePref();quizList()});
+  V.querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>{pref.chk=b.dataset.ck;savePref();quizList()});
+  $("#ca").onclick=()=>{list.forEach(q=>checks.add(q.id));saveChk();quizList()};
+  $("#cn").onclick=()=>{list.forEach(q=>checks.delete(q.id));saveChk();quizList()};
+  bindChk(V);
+  V.querySelectorAll(".qx").forEach(el=>el.onclick=()=>{const id=el.parentNode.dataset.id;QLopen.has(id)?QLopen.delete(id):QLopen.add(id);const y=scrollY;quizList();scrollTo(0,y)});
+  V.querySelectorAll("[data-from]").forEach(b=>b.onclick=()=>{pref.src="seq";setFrom(+b.dataset.from);savePref();startQuiz({w:pref.week,src:"seq",count:pref.count})});
 }
 function startQuiz(o,list){
   let l=list||quizPool(o.w,o.src);if(!list&&o.count&&o.src!=="mock")l=l.slice(0,o.count);
-  if(!list&&o.src==="seq"){const n=Q.filter(inW(o.w)).filter(q=>!pref.type||(q.t||"m")===pref.type).length;pref.seq=pref.seq||{};pref.seq[seqKey()]=(seqPos()+l.length)%Math.max(1,n);savePref()}
+  if(!list&&o.src==="seq"&&l.length){const last=NO[l[l.length-1].id],all=quizPool(o.w,"seq").map(q=>NO[q.id]),nx=all.filter(n=>n>last).sort((a,b)=>a-b)[0];setFrom(nx||1)}
   QZ={o,list:l,i:0,score:0,pts:0,max:l.reduce((a,q)=>a+qPts(q),0),wrong:[],done:false};
   if(pref.tab!=="quiz"){pref.tab="quiz";savePref()}
   go("quiz");
@@ -628,7 +676,7 @@ function runQuiz(){
   if(q.t==="s"||q.t==="f")return runSpecial(q);
   const tf=q.t==="x",order=tf?[0,1]:shuf([0,1,2,3]);z.order=order;
   V.innerHTML=`<section class="card">
-   <div class="meta"><span class="tag">${esc(W[q.w])}</span><span>${z.i+1} / ${z.list.length}</span></div>
+   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b><span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
    <div class="prog"><i style="width:${z.i/z.list.length*100}%"></i></div>
    <p class="q">${esc(q.q)}</p>
    <div class="${tf?"tfrow":"opts"}">${order.map((o,n)=>`<button class="opt" data-o="${o}">${tf?"":`<span class="k">${n+1}</span>`}<span>${esc(tf?["○","×"][o]:q.o[o])}</span></button>`).join("")}</div>
@@ -636,7 +684,7 @@ function runQuiz(){
    <button class="btn plain wide" id="dk">わからない</button>
    <div class="between"><button class="link" id="qt">やめて結果を見る</button><span class="num note" id="sc0">正解 ${z.score} / ${z.i}</span></div>
    <button class="btn wide" id="nx" hidden>次へ</button></section>`;
-  V.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.o));
+  V.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.o));bindChk(V);
   $("#nx").onclick=nextQ;$("#dk").onclick=()=>answer(-1);$("#qt").onclick=()=>{z.list=z.list.slice(0,z.i+(z.answered?1:0));quizResult()};
   keyFn=e=>{
     if(z.answered){if(e.key==="Enter"||e.key===" "){e.preventDefault();nextQ()}return}
@@ -650,7 +698,7 @@ function runSpecial(q){
   const z=QZ,s=q.t==="s",sel=new Set();
   const parts=s?null:q.q.split(/〔[①-⑧]〕/);
   V.innerHTML=`<section class="card">
-   <div class="meta"><span class="tag">${esc(W[q.w])}</span><span>${z.i+1} / ${z.list.length}</span></div>
+   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b><span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
    <div class="prog"><i style="width:${z.i/z.list.length*100}%"></i></div>
    <div class="note" style="color:var(--ink);font-weight:700">${s?"正しいものをすべて選ぶ（完答）":"空欄に入る語句を書く"}</div>
    ${s?`<p class="q">${esc(q.q)}</p><div class="opts">${q.o.map((o,n)=>`<button class="opt" data-o="${n}" aria-pressed="false"><span class="k">${"ABCD"[n]}</span><span>${esc(o)}</span></button>`).join("")}</div>`
@@ -675,7 +723,7 @@ function runSpecial(q){
   };
   if(s)V.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const n=+b.dataset.o;sel.has(n)?sel.delete(n):sel.add(n);b.setAttribute("aria-pressed",sel.has(n));b.style.borderColor=sel.has(n)?"var(--ink)":"";b.style.background=sel.has(n)?"var(--accent-soft)":""});
   else V.querySelectorAll(".fill").forEach((el,i,all)=>el.onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();all[i+1]?all[i+1].focus():check(false)}});
-  $("#ck").onclick=()=>check(false);$("#dk").onclick=()=>check(true);$("#nx").onclick=nextQ;
+  bindChk(V);$("#ck").onclick=()=>check(false);$("#dk").onclick=()=>check(true);$("#nx").onclick=nextQ;
   $("#qt").onclick=()=>{z.list=z.list.slice(0,z.i+(z.answered?1:0));quizResult()};
   keyFn=e=>{if(z.answered){if(e.key==="Enter"||e.key===" "){e.preventDefault();nextQ()}return}
     if(s){const n="1234".indexOf(e.key);if(n>=0)V.querySelectorAll(".opt")[n].click();if(e.key==="Enter"){e.preventDefault();check(false)}}};
@@ -710,8 +758,9 @@ function quizResult(){
    <p class="note">${n}問中 ${z.score}問正解。${r===100&&n?"全問正解です。":r>=80?"あと少し。間違えた問題を確認しましょう。":"解説を読んでから、間違えた問題を解き直しましょう。"}</p>
    ${z.wrong.length?`<button class="btn wide" id="rw">${ic("quiz")}今間違えた ${z.wrong.length}問を解き直す</button>`:""}
    <div class="grade"><button class="btn plain" id="rs2">条件を変える</button><button class="btn ghost" id="ra">もう一度</button></div></section>
-   ${z.wrong.length?`<h2 style="margin-top:4px">間違えた問題</h2><div class="list">${z.wrong.map(({q,o})=>`<div class="item"><div class="qq" style="white-space:pre-line">${esc(qText(q))}</div>
+   ${z.wrong.length?`<h2 style="margin-top:4px">間違えた問題</h2><div class="list">${z.wrong.map(({q,o})=>`<div class="item"><div class="meta" style="justify-content:flex-start;gap:8px;margin-bottom:4px">${chkBtn(q.id)}<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b></div><div class="qq" style="white-space:pre-line">${esc(qText(q))}</div>
      <div class="ee">あなたの答え：${o===-1?"わからない":esc(o)}</div><div class="aa" style="white-space:pre-line">正解：${esc(ansText(q))}</div><div class="ee">${esc(q.e)}</div></div>`).join("")}</div>`:""}</div>`;
+  bindChk(V);
   if($("#rw"))$("#rw").onclick=()=>startQuiz({...z.o,src:"retry"},shuf(z.wrong.map(x=>x.q)));
   $("#ra").onclick=()=>startQuiz(z.o.src==="retry"?{w:pref.week,src:pref.src,count:pref.count}:z.o);
   $("#rs2").onclick=()=>{QZ=null;quiz()};
@@ -858,7 +907,7 @@ const VIEWS={home,quiz,review,terms,essay:essayView};
 applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);
 setInterval(renderTabs,30e3);
 // 新しい版が公開されていたら知らせる（ブラウザが古い版を覚えていることがあるため）
-const APP_V="1793089128375";
+const APP_V="1793609594356436000";
 function checkVersion(){fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
   const m=t.match(/const APP_V="([^"]+)"/);if(!m||m[1]===APP_V||$("#upd"))return;
   document.body.insertAdjacentHTML("beforeend",`<button id="upd" class="btn" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));z-index:30;width:max-content;max-width:calc(100% - 32px)">新しい版があります — タップで更新</button>`);
