@@ -129,6 +129,7 @@ nav.tabs .dot{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;heig
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -527,8 +528,10 @@ const E=[
 ];
 
 // ---- 保存（使えない環境でも画面は動くように、すべて try/catch）
+const SYNC_KEYS=["edu213.miss","edu213.srs","edu213.stat","edu213.essay","edu213.check"];
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
-  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}
+    if(SYNC_KEYS.includes(k)&&window.Cloud&&!Cloud.applying){try{localStorage.setItem("edu213.localAt",String(Date.now()))}catch(e){}Cloud.schedule()}},
   del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const K={miss:"edu213.miss",srs:"edu213.srs",stat:"edu213.stat",essay:"edu213.essay",pref:"edu213.pref"};
 // 旧版（edu213miss / edu213srs は配列の順番で保存）を固定idに読み替える。旧キーは消さずに残す
@@ -633,17 +636,18 @@ function home(){
   </section>
   <section class="card"><div class="between"><h2>記述式</h2><span class="num note">${essDone} / ${E.length} 論点</span></div>
     <button class="btn plain wide" id="hEss">${ic("pen")}論点を自分の言葉で説明する</button></section>
+  <section class="card" id="acct"></section>
   <section class="card"><h2>設定</h2>
     <div><div class="lbl">画面の色</div>${chips("画面の色",[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]],pref.theme)}</div>
-    <div id="move"><button class="btn plain wide" id="mv">記録の引き継ぎ（書き出す・読みこむ）</button></div>
+    <div id="move"><button class="btn plain wide" id="mv">記録をコピーで移す（書き出す・読みこむ）</button></div>
     <div id="reset"><button class="btn plain wide" id="rs">記録をリセット…</button></div>
-    <p class="note">記録はこのブラウザの中だけに保存されます。</p></section></div>`;
+    <p class="note">ログインしていないときは、記録はこのブラウザの中だけに保存されます。</p></section></div>`;
   $("#hRev").onclick=()=>go("review",{w:0});
   if($("#hMiss"))$("#hMiss").onclick=()=>startQuiz({w:0,src:"miss",count:0});
   $("#hEss").onclick=()=>go("essay");
   V.querySelectorAll(".wk").forEach(b=>b.onclick=()=>{pref.week=+b.dataset.w;go("quiz")});
   onChips(V.querySelector('[aria-label="画面の色"]').parentNode,v=>{pref.theme=v;savePref();applyTheme();home()});
-  $("#mv").onclick=moveBox;
+  $("#mv").onclick=moveBox;drawAcct();
   $("#rs").onclick=()=>{$("#reset").innerHTML=`<div class="confirm"><b>どの記録を消しますか？</b><p class="note" style="color:var(--ink)">消した記録は元に戻せません。</p>
     <button class="btn plain wide" data-r="miss">間違えた問題だけ（${miss.size}問）</button>
     <button class="btn danger wide" data-r="all">すべての記録</button>
@@ -1018,10 +1022,92 @@ function essayOne(e){
 }
 
 const VIEWS={home,quiz,review,terms,essay:essayView};
+
+// ---- アカウント（メールのコードでログインし、記録をクラウドに保存）。Roots と同じ Supabase を使う
+const SB_URL="https://jidcvzmfjmlxwlazaixz.supabase.co",SB_KEY="sb_publishable_Vjo96oWVhIjWKFGIN6OMKA_keM8C011";
+const sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:"edu213.auth"}}):null;
+const localAt=()=>+(localStorage.getItem("edu213.localAt")||0);
+var Cloud={user:null,msg:"",timer:null,applying:false,busy:false,
+  set(m){this.msg=m;const el=$("#acMsg");if(el)el.textContent=m},
+  snap(){return {miss:[...miss],srs,stat,essay,check:[...checks]}},
+  apply(d,at){this.applying=true;
+    miss.clear();(d.miss||[]).forEach(i=>QI[i]&&miss.add(i));srs=d.srs||{};stat=d.stat||{};essay=d.essay||{};
+    checks.clear();(d.check||[]).forEach(i=>QI[i]&&checks.add(i));
+    saveMiss();saveSrs();saveStat();saveEssay();saveChk();
+    try{localStorage.setItem("edu213.localAt",String(at))}catch(e){}
+    this.applying=false;renderTabs();if(pref.tab==="home")home();},
+  schedule(){if(!this.user)return;clearTimeout(this.timer);this.set("保存の待ち…");this.timer=setTimeout(()=>this.push(),2500)},
+  async push(){if(!this.user||!sb)return;clearTimeout(this.timer);
+    const at=localAt()||Date.now();
+    let error;try{({error}=await sb.from("edu213_state").upsert({user_id:this.user.id,data:this.snap(),updated_at:new Date(at).toISOString()}))}catch(e){error=e}
+    this.set(error?"保存できませんでした。つながったときに送り直します":"クラウドに保存済み（"+fmtDate(at)+"）");
+    if(error)this.timer=setTimeout(()=>this.push(),30e3);},
+  async pull(){if(!this.user||!sb||this.busy)return;this.busy=true;
+    try{
+      const {data,error}=await sb.from("edu213_state").select("data,updated_at").eq("user_id",this.user.id).maybeSingle();
+      if(error)throw error;
+      const owner=LS.get("edu213.owner",null);
+      if(!data){LS.set("edu213.owner",this.user.id);await this.push();return}
+      const rAt=Date.parse(data.updated_at)||0;
+      if(owner!==this.user.id){ // この端末ではじめてこのアカウント
+        const mine=owner?null:this.snap(); // 前に別の人がログインしていた端末なら、その記録は合わせない
+        this.apply(data.data,rAt);LS.set("edu213.owner",this.user.id);
+        if(mine){const n=mergeImport({v:2,...mine});if(n){try{localStorage.setItem("edu213.localAt",String(Date.now()))}catch(e){}await this.push();toast("この端末の記録をクラウドの記録と合わせました")}}
+        else this.set("クラウドの記録を読みこみました");
+      }else if(rAt>localAt()+1000){this.apply(data.data,rAt);this.set("クラウドの新しい記録を読みこみました");}
+      else if(localAt()>rAt+1000){await this.push();}
+      else this.set("クラウドと同じです（"+fmtDate(rAt)+"）");
+    }catch(e){this.set("クラウドにつながりません。この端末には保存されています")}
+    finally{this.busy=false}}
+};
+function drawAcct(){
+  const A=$("#acct");if(!A)return;
+  if(!sb){A.innerHTML=`<h2>アカウント</h2><p class="note">ログインの部品を読みこめませんでした。インターネットにつないで開き直してください。</p>`;return}
+  if(Cloud.user){
+    A.innerHTML=`<div class="between"><h2>アカウント</h2><span class="badge ok">ログイン中</span></div>
+     <p style="margin:0;word-break:break-all">${esc(Cloud.user.email||"")}</p>
+     <p class="note" id="acMsg">${esc(Cloud.msg||"")}</p>
+     <div class="grade"><button class="btn plain" id="acOut">ログアウト</button><button class="btn ghost" id="acSync">今すぐ同期</button></div>
+     <p class="note">同じメールアドレスでログインすれば、ほかの端末でも同じ記録が使えます。</p>`;
+    $("#acSync").onclick=async()=>{Cloud.set("同期中…");await Cloud.pull()};
+    $("#acOut").onclick=async()=>{await Cloud.push();await sb.auth.signOut();Cloud.user=null;Cloud.msg="";toast("ログアウトしました（この端末の記録は残ります）");drawAcct()};
+    return;
+  }
+  const st=drawAcct.step||"mail";
+  A.innerHTML=`<h2>アカウント（記録の引き継ぎ）</h2>
+   <p class="note">メールアドレスでログインすると、記録がクラウドに保存され、スマホとパソコンなどで同じ記録が使えます。パスワードはいりません（メールに届く6けたのコードを入れます）。</p>
+   ${st==="mail"?`<input class="search" id="acMail" type="email" inputmode="email" autocomplete="email" placeholder="メールアドレス" style="padding-left:14px" value="${esc(drawAcct.mail||"")}">
+     <button class="btn wide" id="acSend">コードを送る</button>`
+   :`<p style="margin:0">${esc(drawAcct.mail)} に届いた6けたのコード</p>
+     <input class="search" id="acCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" style="padding-left:14px;letter-spacing:.2em;font-family:var(--mono)">
+     <button class="btn wide" id="acVer">ログイン</button><button class="link" id="acBack">メールアドレスを入れ直す</button>`}
+   <p class="note" id="acMsg" style="color:var(--ng)"></p>`;
+  const say=t=>{$("#acMsg").textContent=t};
+  if(st==="mail")$("#acSend").onclick=async()=>{
+    const addr=$("#acMail").value.normalize("NFKC").replace(/[。．｡]/g,".").replace(/\s/g,"").toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr))return say("メールアドレスを正しく入力してください。");
+    $("#acSend").disabled=true;say("");
+    let error;try{({error}=await sb.auth.signInWithOtp({email:addr,options:{shouldCreateUser:true}}))}catch(e){error=e}
+    if(error){$("#acSend").disabled=false;return say(/rate|seconds|too many/i.test(String(error.message))?"少し時間をおいてから、もう一度送ってください。":"コードを送れませんでした。インターネットの接続を確認してください。")}
+    drawAcct.mail=addr;drawAcct.step="code";drawAcct();};
+  else{
+    $("#acBack").onclick=()=>{drawAcct.step="mail";drawAcct()};
+    const ver=async()=>{const token=$("#acCode").value.replace(/\D/g,"");
+      if(token.length<6)return say("メールに書かれた数字をすべて入力してください。");
+      $("#acVer").disabled=true;say("");
+      let data,error;try{({data,error}=await sb.auth.verifyOtp({email:drawAcct.mail,token,type:"email"}))}catch(e){error=e}
+      if(error||!data||!data.session){$("#acVer").disabled=false;return say("コードがちがうか、期限が切れています。もう一度ためしてください。")}
+      drawAcct.step="mail";Cloud.user=data.session.user;Cloud.set("同期中…");drawAcct();await Cloud.pull();drawAcct();toast("ログインしました")};
+    $("#acVer").onclick=ver;$("#acCode").onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)ver()};
+  }
+}
+if(sb){sb.auth.getSession().then(({data})=>{if(data&&data.session){Cloud.user=data.session.user;if(pref.tab==="home")drawAcct();Cloud.pull().then(()=>{if(pref.tab==="home")drawAcct()})}}).catch(()=>{});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden){if(Cloud.timer)Cloud.push()}else Cloud.pull()});}
+
 applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);
 setInterval(renderTabs,30e3);
 // 新しい版が公開されていたら知らせる（ブラウザが古い版を覚えていることがあるため）
-const APP_V="1793611384411788000";
+const APP_V="1793626977185738000";
 function checkVersion(){fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
   const m=t.match(/const APP_V="([^"]+)"/);if(!m||m[1]===APP_V||$("#upd"))return;
   document.body.insertAdjacentHTML("beforeend",`<button id="upd" class="btn" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));z-index:30;width:max-content;max-width:calc(100% - 32px)">新しい版があります — タップで更新</button>`);
