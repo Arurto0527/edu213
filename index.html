@@ -483,6 +483,18 @@ Q.push(
 // 人名を答えさせる問題・4択はクイズに出さない（スワイプ復習には残す）
 ["w1-22","w4-02","w4-04","w4-21","w4-22","w1-28"].forEach(id=>{const q=Q.find(x=>x.id===id);if(q)q.nq=1});
 
+
+// 記述：自分の答案（戦後教育法制の転換・7観点）の穴埋め。クイズの番号には入れない（nq）
+Q.push(
+{id:"es-1",w:1,t:"f",nq:1,es:1,q:"第1に、大日本帝国憲法には〔①〕条項がなく、〔②〕によって事実上官僚が制度を定めたが、日本国憲法では「法律の〔③〕により」となり、国民主権のもとで選挙された〔④〕の法律で制度を定めるようになった。",b:[["教育"],["勅令"],["定めるところ"],["国会"]],e:"観点①根拠法形式。条文は「法律の定めるところにより」（26条）。「勅令主義・法律主義」の語だけでは具体性不足。"},
+{id:"es-2",w:1,t:"f",nq:1,es:1,q:"第2に、戦前の教育は天皇・国家のための〔①〕育成で、権利ではなく〔②〕として与えられるものであったが、戦後は26条1項が「教育を受ける〔③〕を有する」とし、教育は子どもの〔④〕権を保障する個人の権利となった。",b:[["臣民"],["恩恵"],["権利"],["学習"]],e:"観点②権利性。「保障」（×保証）。"},
+{id:"es-3",w:1,t:"f",nq:1,es:1,q:"第3に、戦前は身分・性別・経済力・門地によって進路が分かれる〔①〕型で、教育の機会が不平等であったが、戦後は26条1項「その〔②〕に応じて、ひとしく」、旧教育基本法3条「教育上〔③〕されない」により属性による差別が禁じられ、6-3-3制の〔④〕型で全員が同じ出発点に立つようになった。",b:[["複線"],["能力"],["差別"],["単線"]],e:"観点③平等原理。外国人・障害児の話はこの観点では非該当。"},
+{id:"es-4",w:1,t:"f",nq:1,es:1,q:"第4に、戦前の就学義務は〔①〕が国家（天皇）に対して負う義務であったが、戦後は26条2項「その〔②〕する子女に普通教育を受けさせる〔③〕」により、〔④〕が子どもの権利を守るために子どもに対して負う義務になった。",b:[["臣民"],["保護"],["義務"],["保護者"]],e:"観点④義務の性格（名宛人）。条文の文言を「」で引用しないと+1点がつかない。"},
+{id:"es-5",w:1,t:"f",nq:1,es:1,q:"第5に、戦前は〔①〕を柱として、天皇・国家に忠誠を尽くす忠良な臣民の育成が目的であったが、戦後は旧教育基本法1条の「〔②〕の完成」「〔③〕的な国家及び社会の形成者」の育成が教育の目的となった。",b:[["教育勅語"],["人格"],["平和"]],e:"観点⑤教育の目的。"},
+{id:"es-6",w:1,t:"f",nq:1,es:1,q:"第6に、戦前は国家が教育内容を統制・画一化し、教育を国策〔①〕の手段としていたが、戦後は旧教育基本法10条が、教育は「〔②〕に服することなく」行われるとし、行政は内容統制ではなく「必要な諸条件の〔③〕」を目標とする条件整備にとどまることになった。",b:[["遂行"],["不当な支配"],["整備確立"]],e:"観点⑥教育行政。「条件整備」は「不当な支配」との関係で引用すると加点。"},
+{id:"es-7",w:1,t:"f",nq:1,es:1,q:"第7に、戦前の義務教育は〔①〕教育までで、その先は複線化して選抜的であったが、戦後は旧教育基本法4条「〔②〕の普通教育」により、義務教育を〔③〕まで拡張し、中等段階までを保障するようになった。",b:[["初等"],["九年","9年","９年"],["中学校","中学"]],e:"観点⑦義務教育の範囲。戦前から初等は無償だったので、「無償化」を転換の中身として書いても加点されない。"}
+);
+
 // 本番形式の模試の配点（過去問どおり）
 const MOCK={s:{n:1,p:4},x:{n:8,p:2},f:{n:2,p:3}};
 
@@ -794,7 +806,7 @@ function runQuiz(){
   if(q.t==="s"||q.t==="f")return runSpecial(q);
   const tf=q.t==="x",order=tf?[0,1]:shuf([0,1,2,3]);z.order=order;
   V.innerHTML=`<section class="card">
-   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b><span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
+   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}${NO[q.id]?`<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b>`:""}<span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
    <div class="prog"><i style="width:${z.i/z.list.length*100}%"></i></div>
    <p class="q">${esc(q.q)}</p>
    <div class="${tf?"tfrow":"opts"}">${order.map((o,n)=>`<button class="opt" data-o="${o}">${tf?"":`<span class="k">${n+1}</span>`}<span>${esc(tf?["○","×"][o]:q.o[o])}</span></button>`).join("")}</div>
@@ -816,7 +828,7 @@ function runSpecial(q){
   const z=QZ,s=q.t==="s",sel=new Set();
   const parts=s?null:q.q.split(/〔[①-⑧]〕/);
   V.innerHTML=`<section class="card">
-   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b><span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
+   <div class="meta"><span style="display:flex;gap:8px;align-items:center">${chkBtn(q.id)}${NO[q.id]?`<b class="num" style="color:var(--ink)">No.${NO[q.id]}</b>`:""}<span class="tag">${esc(W[q.w])}</span></span><span>${z.i+1} / ${z.list.length}</span></div>
    <div class="prog"><i style="width:${z.i/z.list.length*100}%"></i></div>
    <div class="note" style="color:var(--ink);font-weight:700">${s?"正しいものをすべて選ぶ（完答）":"空欄に入る語句を書く"}</div>
    ${s?`<p class="q">${esc(q.q)}</p><div class="opts">${q.o.map((o,n)=>`<button class="opt" data-o="${n}" aria-pressed="false"><span class="k">${"ABCD"[n]}</span><span>${esc(o)}</span></button>`).join("")}</div>`
@@ -871,7 +883,7 @@ function answer(o){
 function quizResult(){
   const z=QZ;z.done=true;const n=z.list.length,r=n?Math.round(z.score/n*100):0;
   V.innerHTML=`<div class="list"><section class="card">
-   <div class="meta"><span>結果</span><span>${WS[z.o.w]}・${({mock:"本番形式",all:"ランダム",weak:"苦手から",miss:"間違えた問題",retry:"解き直し"})[z.o.src]}</span></div>
+   <div class="meta"><span>結果</span><span>${WS[z.o.w]}・${({essay:"答案の穴埋め",mock:"本番形式",all:"ランダム",weak:"苦手から",miss:"間違えた問題",retry:"解き直し"})[z.o.src]}</span></div>
    ${z.o.src==="mock"?`<div class="big">${z.pts}<small>/ ${z.max}点</small></div><p class="note">問1〜4に相当（${n}問中 ${z.score}問 完答）。問5の論述は「記述」タブの【過去問形式】で練習。</p>`:`<div class="big">${r}<small>%</small></div>`}<div class="prog ${r>=80?"ok":""}"><i style="width:${z.o.src==="mock"&&z.max?z.pts/z.max*100:r}%"></i></div>
    <p class="note">${n}問中 ${z.score}問正解。${r===100&&n?"全問正解です。":r>=80?"あと少し。間違えた問題を確認しましょう。":"解説を読んでから、間違えた問題を解き直しましょう。"}</p>
    ${z.wrong.length?`<button class="btn wide" id="rw">${ic("quiz")}今間違えた ${z.wrong.length}問を解き直す</button>`:""}
@@ -880,7 +892,7 @@ function quizResult(){
      <div class="ee">あなたの答え：${o===-1?"わからない":esc(o)}</div><div class="aa" style="white-space:pre-line">正解：${esc(ansText(q))}</div><div class="ee">${esc(q.e)}</div></div>`).join("")}</div>`:""}</div>`;
   bindChk(V);
   if($("#rw"))$("#rw").onclick=()=>startQuiz({...z.o,src:"retry"},shuf(z.wrong.map(x=>x.q)));
-  $("#ra").onclick=()=>startQuiz(z.o.src==="retry"?{w:pref.week,src:pref.src,count:pref.count}:z.o);
+  $("#ra").onclick=()=>z.o.src==="essay"?startQuiz(z.o,shuf(Q.filter(q=>q.es))):startQuiz(z.o.src==="retry"?{w:pref.week,src:pref.src,count:pref.count}:z.o);
   $("#rs2").onclick=()=>{QZ=null;quiz()};
   keyFn=e=>{if(e.key==="Enter"){e.preventDefault();($("#rw")||$("#ra")).click()}};
   window.scrollTo(0,0);renderTabs();
@@ -990,12 +1002,18 @@ function terms(){
 // ---- 記述式
 function essayView(arg){
   if(arg&&arg.id)return essayOne(E.find(e=>e.id===arg.id));
-  V.innerHTML=`<div class="list"><p class="note">論点を自分の言葉で説明してから、模範解答と見くらべます。チェック項目のうち、書けたものを自分で選んで記録します。</p>
+  const ES=Q.filter(q=>q.es);
+  V.innerHTML=`<div class="list"><section class="card" style="gap:10px"><h2>答案の穴埋め：戦後教育法制の転換（7観点）</h2>
+   <p class="note" style="margin:0">自分の答案を、条文の文言とキーワードを空欄にして練習します（${ES.length}問）。</p>
+   <div class="grade"><button class="btn plain" id="esSeq">第1〜第7の順に</button><button class="btn" id="esRnd">ばらばらに</button></div></section>
+   <p class="note">論点を自分の言葉で説明してから、模範解答と見くらべます。チェック項目のうち、書けたものを自分で選んで記録します。</p>
    ${E.map(e=>{const s=essay[e.id],sc=s&&s.score!=null?s.score:null;
     return `<button class="item" data-id="${e.id}" style="text-align:left;width:100%;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:56px">
      <span><span class="tag">${WS[e.w]}</span><span style="display:block;font-weight:700;margin-top:4px">${esc(e.t)}</span></span>
      <span class="badge ${sc==null?"":sc===e.k.length?"ok":"mid"}">${sc==null?(s&&s.draft?"下書き":"未"):`${sc}/${e.k.length}`}</span></button>`}).join("")}</div>`;
   V.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>essayOne(E.find(e=>e.id===b.dataset.id)));
+  $("#esSeq").onclick=()=>startQuiz({w:0,src:"essay",count:0},ES);
+  $("#esRnd").onclick=()=>startQuiz({w:0,src:"essay",count:0},shuf(ES));
 }
 function essayOne(e){
   const s=essay[e.id]||(essay[e.id]={draft:"",checks:[],score:null});
@@ -1107,7 +1125,7 @@ if(sb){sb.auth.getSession().then(({data})=>{if(data&&data.session){Cloud.user=da
 applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);
 setInterval(renderTabs,30e3);
 // 新しい版が公開されていたら知らせる（ブラウザが古い版を覚えていることがあるため）
-const APP_V="1793626977185738000";
+const APP_V="1793673672651559000";
 function checkVersion(){fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
   const m=t.match(/const APP_V="([^"]+)"/);if(!m||m[1]===APP_V||$("#upd"))return;
   document.body.insertAdjacentHTML("beforeend",`<button id="upd" class="btn" style="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 16px + env(safe-area-inset-bottom));z-index:30;width:max-content;max-width:calc(100% - 32px)">新しい版があります — タップで更新</button>`);
